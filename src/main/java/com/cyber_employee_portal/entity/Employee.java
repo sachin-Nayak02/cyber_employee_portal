@@ -2,20 +2,32 @@ package com.cyber_employee_portal.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.*;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 //import jakarta.annotation.Generated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "employees")
-public class Employee {
+public class Employee implements UserDetails{ 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -69,7 +81,7 @@ public class Employee {
     private String department;
 
     @Column
-    private String designation;
+    private String designation; 
 
     @Column
     private String employmentType; // Full-Time, Intern, Contract
@@ -101,8 +113,49 @@ public class Employee {
     @Column
     private LocalDateTime createdAt;
 
-    @Column
+    @Column 
     private LocalDateTime updatedAt; 
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
+
+    // ===== UserDetails methods (required by Spring Security) =====
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+    }
+ 
+    @Override
+    public String getUsername() {
+        return email; // we log in using email, not a separate username field
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 
     @PrePersist
     public void onCreate() {
