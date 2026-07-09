@@ -1,5 +1,42 @@
 package com.cyber_employee_portal.dto;
 
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDate;
+
+@Getter
+@Setter
 public class RegisterRequest {
 
+    @NotBlank(message = "Name is required")
+    private String name;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
+    private String email;
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    private String password;
+
+    private String phoneNumber;
+
+    private LocalDate dateOfBirth;
+
+    private String gender;
+
+    private String department;
+
+    private String designation;
+
+    private String employmentType; // Full-Time, Intern, Contract
+
+    private LocalDate joiningDate;
+
+    private Double salary;
+
+    // If not provided, defaults to "EMPLOYEE" in the service layer
+    private String roleName;
 }
