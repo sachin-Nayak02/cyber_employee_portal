@@ -9,7 +9,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.function.Function;
 
-@Component   // <-- this line must be present
+@Component   
 public class JwtUtil {
 
     private static final String SECRET = "ThisIsAVeryLongSecretKeyForJwtHS256MinimumThirtyTwoBytes!";
