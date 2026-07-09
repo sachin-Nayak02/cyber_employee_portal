@@ -36,6 +36,28 @@ public class RegisterRequest {
     private LocalDate joiningDate;
 
     private Double salary;
+    private String managerId;
+
+    private String emergencyContactName;
+
+    private String emergencyContactNumber;
+
+    private String profileImage;
+    
+    //------------
+    private String bloodGroup;
+    private String maritalStatus;
+    private String nationality;
+
+    private String address;
+    private String city;
+    private String state;
+    private String country;
+    private String pincode;
+
+
+    
+    //----------------
 
     // If not provided, defaults to "EMPLOYEE" in the service layer
     private String roleName;
