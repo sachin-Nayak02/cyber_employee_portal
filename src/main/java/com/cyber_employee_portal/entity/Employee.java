@@ -28,6 +28,11 @@ import lombok.Setter;
 @Setter
 @Table(name = "employees")
 public class Employee implements UserDetails{ 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
