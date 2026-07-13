@@ -3,6 +3,7 @@ package com.cyber_employee_portal.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -35,7 +36,6 @@ public class SecurityConfig {
         return provider;
     }
 
-    // THIS is the bean AuthController needs
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
@@ -46,6 +46,8 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.PATCH, "/api/auth/update/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/auth/update/**").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(
                 		"/v3/api-docs/**",
