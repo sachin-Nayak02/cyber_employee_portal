@@ -1,9 +1,14 @@
 package com.cyber_employee_portal.controller;
 
+import com.cyber_employee_portal.dto.AdminUserResponse;
 import com.cyber_employee_portal.dto.LoginRequest;
 import com.cyber_employee_portal.dto.LoginResponse;
+import com.cyber_employee_portal.dto.RegisterRequest;
+import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.entity.Employee;
 import com.cyber_employee_portal.security.JwtUtil;
+
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,4 +47,6 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid email or password");
         }
     }
+    
+  
 }

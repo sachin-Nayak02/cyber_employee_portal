@@ -26,6 +26,8 @@ public class RegisterRequest {
     private LocalDate dateOfBirth;
 
     private String gender;
+    
+    private String employeeId;
 
     private String department;
 
@@ -61,4 +63,16 @@ public class RegisterRequest {
 
     // If not provided, defaults to "EMPLOYEE" in the service layer
     private String roleName;
+
+
+
+//	public String getEmployeeId() { 
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
+
+
+	
+	
 }
