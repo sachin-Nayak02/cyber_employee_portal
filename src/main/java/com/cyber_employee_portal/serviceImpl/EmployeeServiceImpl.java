@@ -10,6 +10,7 @@ import com.cyber_employee_portal.entity.Employee;
 import com.cyber_employee_portal.entity.Role;
 import com.cyber_employee_portal.exception.EmailAlreadyExistsException;
 import com.cyber_employee_portal.exception.EmployeeNotFoundException;
+import com.cyber_employee_portal.exception.InvalidEmployeeIdException;
 import com.cyber_employee_portal.repository.AdminUserRepository;
 import com.cyber_employee_portal.repository.EmployeeRepository;
 import com.cyber_employee_portal.repository.RoleRepository;
@@ -22,8 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 
+import java.util.Arrays;
+ 
 @Service
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
@@ -37,10 +39,23 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
 
+        // 1. Validate employeeId exists in AdminUsers table (pre-issued by admin)
+        AdminUsers adminUser = adminUserRepository.findByEmployeeId(request.getEmployeeId())
+                .orElseThrow(() -> new InvalidEmployeeIdException(
+                        "Invalid Employee ID. This ID was not issued by admin: " + request.getEmployeeId()));
+
+        // 2. Prevent reusing an employeeId that's already been registered
+        if (employeeRepository.existsByEmployeeId(request.getEmployeeId())) {
+            throw new InvalidEmployeeIdException(
+                    "This Employee ID has already been used to register: " + request.getEmployeeId());
+        }
+
+        // 3. Prevent duplicate email registration
         if (employeeRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
         }
 
+        // 4. Resolve role — default to EMPLOYEE if not provided
         String roleName = (request.getRoleName() == null || request.getRoleName().isBlank())
                 ? "EMPLOYEE"
                 : request.getRoleName().toUpperCase();
@@ -48,6 +63,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
 
+        // 5. Build employee entity
         Employee employee = new Employee();
         employee.setName(request.getName());
         employee.setEmail(request.getEmail());
@@ -88,7 +104,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 "Employee registered successfully"
         );
     }
-    
+
     @Override
     @Transactional
     public AdminUserResponse generateEmpId(AdminUserRequest request) {

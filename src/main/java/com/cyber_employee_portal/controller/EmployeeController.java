@@ -31,7 +31,7 @@ public class EmployeeController {
     }
     
     @Operation(summary = "Register a new employee by Admin")
-    @PostMapping("/adminregister")
+    @PostMapping("/admin/register")
     public ResponseEntity<AdminUserResponse> adminregister(@Valid @RequestBody AdminUserRequest request) {
     	AdminUserResponse response = employeeService.generateEmpId(request);
         return ResponseEntity.ok(response);

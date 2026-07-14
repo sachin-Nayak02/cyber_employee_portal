@@ -18,4 +18,6 @@ public class AdminUsers {
     @Column(unique = true, nullable = false)
     private String employeeId;
 
+	
+
 }
