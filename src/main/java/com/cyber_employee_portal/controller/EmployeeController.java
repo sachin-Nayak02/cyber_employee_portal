@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
@@ -38,11 +37,12 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
     
-    @Operation(summary = "Partially update an employee (only supplied fields change)")
+    @Operation(summary = "Update an employee (only the fields you send get changed)")
     @PatchMapping("/update/{id}")
-    public ResponseEntity<?> patchUpdate(@PathVariable Long id,
-                                          @Valid @RequestBody UpdateEmployeeRequest request) {
-        return handleUpdate(id, request, true);
+    public ResponseEntity<RegisterResponse> updateEmployee(@PathVariable Long id,
+                                                            @Valid @RequestBody UpdateEmployeeRequest request) {
+        RegisterResponse response = employeeService.updateEmployee(id, request);
+        return ResponseEntity.ok(response);
     }
  
     @Operation(summary = "Delete an employee by id")
@@ -51,24 +51,14 @@ public class EmployeeController {
         employeeService.deleteEmployee(id);
         return ResponseEntity.noContent().build();
     }
-    
-//    @Operation(summary = "Fully replace an employee's editable fields")
-//    @PutMapping("/update/{id}")
-//    public ResponseEntity<?> putUpdate(@PathVariable Long id,
-//                                        @Valid @RequestBody UpdateEmployeeRequest request) {
-//        return handleUpdate(id, request, false);
-//    }
 
-    private ResponseEntity<?> handleUpdate(Long id, UpdateEmployeeRequest request, boolean isPartial) {
-        try {
-            RegisterResponse response = employeeService.updateEmployee(id, request, isPartial);
-            return ResponseEntity.ok(response);
-        } catch (EmployeeNotFoundException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (AccessDeniedException e) { 
-            return ResponseEntity.status(403).body(e.getMessage());
-        } catch (EmailAlreadyExistsException | IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+    @ExceptionHandler(EmployeeNotFoundException.class)
+    public ResponseEntity<String> handleNotFound(EmployeeNotFoundException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
+        return ResponseEntity.status(400).body(e.getMessage());
     }
 }

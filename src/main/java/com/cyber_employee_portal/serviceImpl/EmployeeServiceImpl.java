@@ -15,12 +15,14 @@ import com.cyber_employee_portal.repository.EmployeeRepository;
 import com.cyber_employee_portal.repository.RoleRepository;
 import com.cyber_employee_portal.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -45,8 +47,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
-
-//        String employeeId = generateEmployeeId();
 
         Employee employee = new Employee();
         employee.setName(request.getName());
@@ -108,8 +108,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     			saved.getEmail(),
                 saved.getEmployeeId()
         );
-    	
-    	
     }
 
     private String generateEmployeeId() {
@@ -119,54 +117,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    public RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request, boolean isPartial) {
+    public RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request) {
 
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
 
-        Employee currentUser = getCurrentAuthenticatedEmployee();
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(currentUser.getRole().getName());
-        boolean isSelf = currentUser.getId().equals(id);
-
-        if (!isAdmin && !isSelf) {
-            throw new AccessDeniedException("You are not allowed to update this employee record");
-        }
-
-        if (!isAdmin && (request.getRoleName() != null || request.getActive() != null)) {
-            throw new AccessDeniedException("Only an administrator can change role or active status");
-        }
-
-        if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(employee.getEmail())) {
-            if (employeeRepository.existsByEmail(request.getEmail())) {
-                throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
-            }
-            employee.setEmail(request.getEmail());
-        } else if (!isPartial && request.getEmail() == null) {
-            throw new IllegalArgumentException("Email is required for a full update (PUT)");
-        }
-
-        if (!isPartial && (request.getName() == null || request.getName().isBlank())) {
-            throw new IllegalArgumentException("Name is required for a full update (PUT)");
-        }
-
-        if (isPartial) {
-            applyPartial(employee, request);
-        } else {
-            applyFull(employee, request);
-        }
+        BeanUtils.copyProperties(request, employee, getNullPropertyNames(request));
 
         if (request.getPassword() != null) {
             employee.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
-
-        if (isAdmin && request.getRoleName() != null) {
-            Role role = roleRepository.findByName(request.getRoleName().toUpperCase())
-                    .orElseThrow(() -> new IllegalArgumentException("Role not found: " + request.getRoleName()));
-            employee.setRole(role);
-        }
-
-        if (isAdmin && request.getActive() != null) {
-            employee.setActive(request.getActive());
         }
 
         Employee saved = employeeRepository.save(employee);
@@ -177,10 +136,19 @@ public class EmployeeServiceImpl implements EmployeeService {
                 saved.getName(),
                 saved.getEmail(),
                 saved.getRole().getName(),
-                isPartial ? "Employee updated successfully" : "Employee replaced successfully"
+                "Employee updated successfully"
         );
-    } 
-    
+    }
+
+  
+    private String[] getNullPropertyNames(Object source) {
+        BeanWrapper wrapper = new BeanWrapperImpl(source);
+        return Arrays.stream(wrapper.getPropertyDescriptors())
+                .map(java.beans.PropertyDescriptor::getName)
+                .filter(name -> wrapper.getPropertyValue(name) == null)
+                .toArray(String[]::new);
+    }
+
     @Override
     @Transactional
     public void deleteEmployee(Long id) {
@@ -188,61 +156,5 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new EmployeeNotFoundException("Employee not found with id: " + id);
         }
         employeeRepository.deleteById(id);
-    }
-
-    private void applyPartial(Employee employee, UpdateEmployeeRequest r) {
-        if (r.getName() != null) employee.setName(r.getName());
-        if (r.getPhoneNumber() != null) employee.setPhoneNumber(r.getPhoneNumber());
-        if (r.getDateOfBirth() != null) employee.setDateOfBirth(r.getDateOfBirth());
-        if (r.getGender() != null) employee.setGender(r.getGender());
-        if (r.getBloodGroup() != null) employee.setBloodGroup(r.getBloodGroup());
-        if (r.getMaritalStatus() != null) employee.setMaritalStatus(r.getMaritalStatus());
-        if (r.getNationality() != null) employee.setNationality(r.getNationality());
-        if (r.getAddress() != null) employee.setAddress(r.getAddress());
-        if (r.getCity() != null) employee.setCity(r.getCity());
-        if (r.getState() != null) employee.setState(r.getState());
-        if (r.getCountry() != null) employee.setCountry(r.getCountry());
-        if (r.getPincode() != null) employee.setPincode(r.getPincode());
-        if (r.getDepartment() != null) employee.setDepartment(r.getDepartment());
-        if (r.getDesignation() != null) employee.setDesignation(r.getDesignation());
-        if (r.getEmploymentType() != null) employee.setEmploymentType(r.getEmploymentType());
-        if (r.getJoiningDate() != null) employee.setJoiningDate(r.getJoiningDate());
-        if (r.getSalary() != null) employee.setSalary(r.getSalary());
-        if (r.getManagerId() != null) employee.setManagerId(r.getManagerId());
-        if (r.getEmergencyContactName() != null) employee.setEmergencyContactName(r.getEmergencyContactName());
-        if (r.getEmergencyContactNumber() != null) employee.setEmergencyContactNumber(r.getEmergencyContactNumber());
-        if (r.getProfileImage() != null) employee.setProfileImage(r.getProfileImage());
-    }
-
-    private void applyFull(Employee employee, UpdateEmployeeRequest r) {
-        employee.setName(r.getName());
-        employee.setPhoneNumber(r.getPhoneNumber());
-        employee.setDateOfBirth(r.getDateOfBirth());
-        employee.setGender(r.getGender());
-        employee.setBloodGroup(r.getBloodGroup());
-        employee.setMaritalStatus(r.getMaritalStatus());
-        employee.setNationality(r.getNationality());
-        employee.setAddress(r.getAddress());
-        employee.setCity(r.getCity());
-        employee.setState(r.getState());
-        employee.setCountry(r.getCountry());
-        employee.setPincode(r.getPincode());
-        employee.setDepartment(r.getDepartment());
-        employee.setDesignation(r.getDesignation());
-        employee.setEmploymentType(r.getEmploymentType());
-        employee.setJoiningDate(r.getJoiningDate());
-        employee.setSalary(r.getSalary());
-        employee.setManagerId(r.getManagerId());
-        employee.setEmergencyContactName(r.getEmergencyContactName());
-        employee.setEmergencyContactNumber(r.getEmergencyContactNumber());
-        employee.setProfileImage(r.getProfileImage());
-    }
-
-    private Employee getCurrentAuthenticatedEmployee() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof Employee)) {
-            throw new AccessDeniedException("No authenticated user found");
-        }
-        return (Employee) authentication.getPrincipal();
     }
 }
