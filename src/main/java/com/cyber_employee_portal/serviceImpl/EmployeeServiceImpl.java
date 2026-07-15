@@ -22,6 +22,14 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.cyber_employee_portal.dto.ForgotPasswordRequest;
+import com.cyber_employee_portal.dto.ResetPasswordRequest;
+import com.cyber_employee_portal.exception.InvalidOtpException;
+import com.cyber_employee_portal.service.EmailService;
+
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+
 
 
 import java.util.Arrays;
@@ -34,6 +42,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final RoleRepository roleRepository;
     private  final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -163,6 +172,68 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .map(java.beans.PropertyDescriptor::getName)
                 .filter(name -> wrapper.getPropertyValue(name) == null)
                 .toArray(String[]::new);
+    }
+    
+//    ---------------------------forgot password service logic-----------------------------------------------------
+    
+    @Override
+    @Transactional
+    public String forgotPassword(ForgotPasswordRequest request) {
+
+        Employee employee = employeeRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new EmployeeNotFoundException(
+                        "No employee found with email: " + request.getEmail()));
+
+        String otp = generateOtp();
+
+        employee.setOtp(otp);
+        employee.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
+        employeeRepository.save(employee);
+
+        emailService.sendOtpEmail(employee.getEmail(), otp);
+
+        return "OTP sent successfully to " + request.getEmail();
+    }
+
+    @Override
+    @Transactional
+    public String resetPassword(ResetPasswordRequest request) {
+
+        Employee employee = employeeRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new EmployeeNotFoundException(
+                        "No employee found with email: " + request.getEmail()));
+
+        // Check OTP exists
+        if (employee.getOtp() == null) {
+            throw new InvalidOtpException("No OTP request found. Please request a new OTP.");
+        }
+
+        // Check OTP matches
+        if (!employee.getOtp().equals(request.getOtp())) {
+            throw new InvalidOtpException("Invalid OTP");
+        }
+
+        // Check OTP hasn't expired
+        if (employee.getOtpExpiry() == null || employee.getOtpExpiry().isBefore(LocalDateTime.now())) {
+            throw new InvalidOtpException("OTP has expired. Please request a new one.");
+        }
+
+        // All checks passed — update password (encrypted)
+        employee.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // Clear OTP so it can't be reused
+        employee.setOtp(null);
+        employee.setOtpExpiry(null);
+
+        employeeRepository.save(employee);
+
+        return "Password reset successfully";
+    }
+
+    private String generateOtp() {
+        SecureRandom random = new SecureRandom();
+        int otp = 100000 + random.nextInt(900000); // always 6 digits
+        return String.valueOf(otp);
     }
 
     @Override
