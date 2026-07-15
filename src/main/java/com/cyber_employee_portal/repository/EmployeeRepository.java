@@ -7,10 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import com.cyber_employee_portal.entity.Employee;
 
-@Repository 
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
-	Optional<Employee> findByEmail(String email);
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+    Optional<Employee> findByEmail(String email);
     boolean existsByEmail(String email);
 }
- 

@@ -1,32 +1,22 @@
 package com.cyber_employee_portal.service;
 
+import java.util.List;
+
 import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
+import com.cyber_employee_portal.dto.EmployeeResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
-
 import com.cyber_employee_portal.dto.UpdateEmployeeRequest;
 import com.cyber_employee_portal.entity.Employee;
 
-import jakarta.validation.Valid;
-
-import java.util.List;
-
-
-
 public interface EmployeeService {
-	
-//	Employee postEmployee(Employee employee);
-//    List<Employee> getAllEmployee(); 
-//    void deleteEmployee(Long id); 
-//    Employee updateEmployee(Long id, Employee employee); 
-    RegisterResponse register(RegisterRequest request); 
-//    RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request, boolean isPartial);
-	RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request, boolean isPartial);
-//	AdminUserResponse generateEmpId(AdminUserRequest request); 
-	public void deleteEmployee (Long id);
-	AdminUserResponse generateEmpId(AdminUserRequest request);
 
- 
+    RegisterResponse register(RegisterRequest request);
+    //RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request, boolean isPartial);
+    public void deleteEmployee(Long id);
+    AdminUserResponse generateEmpId(AdminUserRequest request);
+
+    List<EmployeeResponse> getAllEmployee();
+	RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request);
 }
- 

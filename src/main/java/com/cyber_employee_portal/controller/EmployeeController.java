@@ -1,7 +1,13 @@
 package com.cyber_employee_portal.controller;
+import com.cyber_employee_portal.entity.Employee;
+import java.util.List;
+
+import com.cyber_employee_portal.entity.Employee;
+import java.util.List;
 
 import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
+import com.cyber_employee_portal.dto.EmployeeResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.dto.UpdateEmployeeRequest;
@@ -37,6 +43,14 @@ public class EmployeeController {
     	AdminUserResponse response = employeeService.generateEmpId(request);
         return ResponseEntity.ok(response);
     }
+    @Operation(summary = "Get all employees")
+    @GetMapping("/all")
+    public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
+        List<EmployeeResponse> employees = employeeService.getAllEmployee();
+        return ResponseEntity.ok(employees);
+    }
+    
+    
     
     @Operation(summary = "Partially update an employee (only supplied fields change)")
     @PatchMapping("/update/{id}")
@@ -61,7 +75,7 @@ public class EmployeeController {
 
     private ResponseEntity<?> handleUpdate(Long id, UpdateEmployeeRequest request, boolean isPartial) {
         try {
-            RegisterResponse response = employeeService.updateEmployee(id, request, isPartial);
+            RegisterResponse response = employeeService.updateEmployee( id,  request);
             return ResponseEntity.ok(response);
         } catch (EmployeeNotFoundException e) {
             return ResponseEntity.status(404).body(e.getMessage());
@@ -70,5 +84,5 @@ public class EmployeeController {
         } catch (EmailAlreadyExistsException | IllegalArgumentException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
-    }
-}
+    }}
+
