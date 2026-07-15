@@ -13,7 +13,7 @@ public class AdminUsers {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String email; // e.g. ADMIN, EMPLOYEE
+    private String email; 
     
     @Column(unique = true, nullable = false)
     private String employeeId;
