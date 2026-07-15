@@ -1,6 +1,7 @@
 package com.cyber_employee_portal.controller;
 
 import com.cyber_employee_portal.dto.AdminUserRequest;
+
 import com.cyber_employee_portal.dto.AdminUserResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
@@ -12,8 +13,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.*;
+
 import org.springframework.http.ResponseEntity;
+import com.cyber_employee_portal.dto.ForgotPasswordRequest;
+import com.cyber_employee_portal.dto.ResetPasswordRequest;
+
 import org.springframework.web.bind.annotation.*;
+
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
 @RestController
@@ -42,6 +50,24 @@ public class EmployeeController {
     public ResponseEntity<RegisterResponse> updateEmployee(@PathVariable Long id,
                                                             @Valid @RequestBody UpdateEmployeeRequest request) {
         RegisterResponse response = employeeService.updateEmployee(id, request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @Operation(summary = "Request OTP for password reset")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String message = employeeService.forgotPassword(request);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Reset password using OTP")
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        String message = employeeService.resetPassword(request);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
         return ResponseEntity.ok(response);
     }
  

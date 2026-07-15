@@ -122,8 +122,16 @@ public class Employee implements UserDetails{
     @Column 
     private LocalDateTime updatedAt; 
     
+
    
-//    private Department departmentId;
+
+
+    @Column
+    private String otp;
+
+    @Column
+    private LocalDateTime otpExpiry;
+
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
