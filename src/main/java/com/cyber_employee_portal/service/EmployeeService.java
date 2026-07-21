@@ -2,6 +2,14 @@ package com.cyber_employee_portal.service;
 
 import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
+import com.cyber_employee_portal.dto.BirthdayResponse;
+import com.cyber_employee_portal.dto.CalendarResponse;
+import com.cyber_employee_portal.dto.RegisterRequest;
+import com.cyber_employee_portal.dto.RegisterResponse;
+import com.cyber_employee_portal.dto.AnniversaryResponse;
+import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
+
+
 import com.cyber_employee_portal.dto.ForgotPasswordRequest;
 import com.cyber_employee_portal.dto.NetworkResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
@@ -27,10 +35,26 @@ public interface EmployeeService {
     RegisterResponse register(RegisterRequest request); 
 	RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request);
 	public void deleteEmployee (Long id);
-	AdminUserResponse generateEmpId(AdminUserRequest request);
+
+	AdminUserResponse generateEmpId(AdminUserRequest request); 
+	List<BirthdayResponse> getTodayBirthdays(); 
+	 List<AnniversaryResponse> getTodayAnniversaries();
+	 List<BirthdayResponse> getUpcomingBirthdays();
+	 List<BirthdayResponse> getBirthdayList();
+	 List<RegisterResponse> getEmployeesByGender(String gender);
+	 List<CalendarResponse> getCalendarEvents();
+	 
+	 
+	 CurrentDateTimeResponse getCurrentDateTime();
+	 
+
+ 
+
+//	AdminUserResponse generateEmpId(AdminUserRequest request);
 	String forgotPassword(ForgotPasswordRequest request);
     String resetPassword(ResetPasswordRequest request);
    
     List<NetworkResponse> getMyNetwork(String email);
     List<NetworkResponse> findPeopleByName(String email, String name);
+
 }
