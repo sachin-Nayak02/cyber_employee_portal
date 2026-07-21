@@ -85,6 +85,6 @@ public class EmployeeController {
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
-        return ResponseEntity.status(400).body(e.getMessage());
+        return ResponseEntity.status(400).body(e.getMessage()); 
     }
 }
