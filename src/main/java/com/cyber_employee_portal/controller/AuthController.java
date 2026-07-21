@@ -65,7 +65,7 @@ public class AuthController {
             tokenBlacklistService.blacklistToken(token, expiryMillis);
         }
 
-        Map<String, String> response = new HashMap<>();
+        Map<String, String> response = new HashMap<>(); 
         response.put("message", "Logged out successfully");
         return ResponseEntity.ok(response);
     }
