@@ -32,6 +32,9 @@ public class Employee implements UserDetails{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+
+    
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,8 +85,9 @@ public class Employee implements UserDetails{
     @Column
     private String pincode;
 
-    @Column
-    private String department;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     @Column
     private String designation; 
@@ -120,6 +124,17 @@ public class Employee implements UserDetails{
 
     @Column 
     private LocalDateTime updatedAt; 
+    
+
+    private LocalDateTime sessionExpiry;
+
+
+    @Column
+    private String otp;
+
+    @Column
+    private LocalDateTime otpExpiry;
+
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")

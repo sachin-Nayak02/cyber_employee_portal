@@ -27,6 +27,7 @@ public class RegisterRequest {
 
     private String gender;
     
+    @NotBlank(message = "Employee ID is required")
     private String employeeId;
 
     private String department;

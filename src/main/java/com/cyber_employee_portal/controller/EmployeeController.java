@@ -1,6 +1,7 @@
 package com.cyber_employee_portal.controller;
 
 import com.cyber_employee_portal.dto.AdminUserRequest;
+
 import com.cyber_employee_portal.dto.AdminUserResponse;
 import com.cyber_employee_portal.dto.AnniversaryResponse;
 import com.cyber_employee_portal.dto.BirthdayResponse;
@@ -15,10 +16,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+<<<<<<< HEAD
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+=======
+import java.util.*;
+
+import org.springframework.http.ResponseEntity;
+import com.cyber_employee_portal.dto.ForgotPasswordRequest;
+import com.cyber_employee_portal.dto.ResetPasswordRequest;
+
+>>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
 import org.springframework.web.bind.annotation.*;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
+
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
 @RestController
@@ -36,7 +47,7 @@ public class EmployeeController {
     }
     
     @Operation(summary = "Register a new employee by Admin")
-    @PostMapping("/adminregister")
+    @PostMapping("/admin/register")
     public ResponseEntity<AdminUserResponse> adminregister(@Valid @RequestBody AdminUserRequest request) {
     	AdminUserResponse response = employeeService.generateEmpId(request);
         return ResponseEntity.ok(response);
@@ -48,6 +59,27 @@ public class EmployeeController {
                                                             @Valid @RequestBody UpdateEmployeeRequest request) {
         RegisterResponse response = employeeService.updateEmployee(id, request);
         return ResponseEntity.ok(response);
+<<<<<<< HEAD
+=======
+    }
+    
+    @Operation(summary = "Request OTP for password reset")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String message = employeeService.forgotPassword(request);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Reset password using OTP")
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        String message = employeeService.resetPassword(request);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+        return ResponseEntity.ok(response);
+>>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
     }
  
     @Operation(summary = "Delete an employee by id")
@@ -60,6 +92,7 @@ public class EmployeeController {
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<String> handleNotFound(EmployeeNotFoundException e) {
         return ResponseEntity.status(404).body(e.getMessage());
+<<<<<<< HEAD
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
@@ -96,5 +129,13 @@ public class EmployeeController {
     @GetMapping("/currentDateTime")
     public ResponseEntity<CurrentDateTimeResponse> getCurrentDateTime() {
         return ResponseEntity.ok(employeeService.getCurrentDateTime());
+=======
+>>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
     }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
+        return ResponseEntity.status(400).body(e.getMessage()); 
+    }
+    
 }

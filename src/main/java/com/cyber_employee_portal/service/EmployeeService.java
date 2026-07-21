@@ -2,12 +2,20 @@ package com.cyber_employee_portal.service;
 
 import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
+<<<<<<< HEAD
 import com.cyber_employee_portal.dto.BirthdayResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.dto.AnniversaryResponse;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 
+=======
+import com.cyber_employee_portal.dto.ForgotPasswordRequest;
+import com.cyber_employee_portal.dto.NetworkResponse;
+import com.cyber_employee_portal.dto.RegisterRequest;
+import com.cyber_employee_portal.dto.RegisterResponse;
+import com.cyber_employee_portal.dto.ResetPasswordRequest;
+>>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
 import com.cyber_employee_portal.dto.UpdateEmployeeRequest;
 import com.cyber_employee_portal.entity.Employee;
 
@@ -15,10 +23,12 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 
 
 public interface EmployeeService {
-	
+	 
 //	Employee postEmployee(Employee employee);
 //    List<Employee> getAllEmployee(); 
 //    void deleteEmployee(Long id); 
@@ -26,6 +36,7 @@ public interface EmployeeService {
     RegisterResponse register(RegisterRequest request); 
 	RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request);
 	public void deleteEmployee (Long id);
+<<<<<<< HEAD
 	AdminUserResponse generateEmpId(AdminUserRequest request); 
 	List<BirthdayResponse> getTodayBirthdays();
 	 List<AnniversaryResponse> getTodayAnniversaries();
@@ -38,4 +49,12 @@ public interface EmployeeService {
 	 
 
  
+=======
+	AdminUserResponse generateEmpId(AdminUserRequest request);
+	String forgotPassword(ForgotPasswordRequest request);
+    String resetPassword(ResetPasswordRequest request);
+   
+    List<NetworkResponse> getMyNetwork(String email);
+    List<NetworkResponse> findPeopleByName(String email, String name);
+>>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
 }
