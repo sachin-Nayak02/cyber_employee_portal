@@ -32,6 +32,9 @@ public class Employee implements UserDetails{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+
+    
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -123,7 +126,7 @@ public class Employee implements UserDetails{
     private LocalDateTime updatedAt; 
     
 
-   
+    private LocalDateTime sessionExpiry;
 
 
     @Column
