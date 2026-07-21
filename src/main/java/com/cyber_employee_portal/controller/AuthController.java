@@ -6,8 +6,11 @@ import com.cyber_employee_portal.dto.LoginResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.entity.Employee;
+import com.cyber_employee_portal.repository.EmployeeRepository;
 import com.cyber_employee_portal.security.JwtUtil;
 import com.cyber_employee_portal.security.TokenBlacklistService;
+
+import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-
+ 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -28,7 +31,14 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+
     private final TokenBlacklistService tokenBlacklistService;
+
+    private final EmployeeRepository employeeRepository;
+
+    // Must match JwtUtil's token expiration duration (currently 10 hours)
+    private static final long SESSION_HOURS = 10;
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
@@ -39,6 +49,10 @@ public class AuthController {
 
             Employee employee = (Employee) authentication.getPrincipal();
             String token = jwtUtil.generateToken(employee);
+
+            
+            employee.setSessionExpiry(LocalDateTime.now().plusHours(SESSION_HOURS));
+            employeeRepository.save(employee);
 
             LoginResponse response = new LoginResponse(
                     token,

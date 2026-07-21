@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-//import com.cyber_employee_portal.exception.InvalidEmployeeIdException;
 
 import java.util.HashMap;
 import java.util.Map;

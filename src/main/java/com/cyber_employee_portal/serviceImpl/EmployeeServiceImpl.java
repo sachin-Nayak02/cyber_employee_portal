@@ -17,6 +17,8 @@ import com.cyber_employee_portal.repository.DepartmentRepository;
 import com.cyber_employee_portal.repository.EmployeeRepository;
 import com.cyber_employee_portal.repository.RoleRepository;
 import com.cyber_employee_portal.service.EmployeeService;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -30,9 +32,11 @@ import com.cyber_employee_portal.exception.InvalidOtpException;
 import com.cyber_employee_portal.service.EmailService;
 
 import java.security.SecureRandom;
+import java.text.CollationElementIterator;
 import java.time.LocalDateTime;
 
-
+import com.cyber_employee_portal.dto.NetworkResponse;
+import java.util.stream.Collectors;
 
 import java.util.Arrays;
  
@@ -205,6 +209,64 @@ public class EmployeeServiceImpl implements EmployeeService {
         emailService.sendOtpEmail(employee.getEmail(), otp);
 
         return "OTP sent successfully to " + request.getEmail();
+    }
+    @Override
+    public List<NetworkResponse> getMyNetwork(String email) {
+
+        Employee currentEmployee = employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new EmployeeNotFoundException(
+                        "No employee found with email: " + email));
+
+        if (currentEmployee.getDepartment() == null) {
+            return List.of();
+        }
+
+        return employeeRepository.findByDepartment_Id(currentEmployee.getDepartment().getId())
+                .stream()
+                .filter(emp -> !emp.getId().equals(currentEmployee.getId()))
+                .map(emp -> new NetworkResponse(
+                        emp.getId(),
+                        emp.getEmployeeId(),
+                        emp.getName(),
+                        emp.getEmail(),
+                        emp.getDesignation(),
+                        emp.getDepartment().getDepartmentName(),
+                        emp.getProfileImage()
+                ))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<NetworkResponse> findPeopleByName(String email, String name) {
+
+        Employee currentEmployee = employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new EmployeeNotFoundException(
+                        "No employee found with email: " + email));
+
+        if (currentEmployee.getDepartment() == null) {
+            return List.of();
+        }
+
+        List<NetworkResponse> results = employeeRepository
+                .findByDepartment_IdAndNameContainingIgnoreCase(currentEmployee.getDepartment().getId(), name)
+                .stream()
+                .filter(emp -> !emp.getId().equals(currentEmployee.getId()))
+                .map(emp -> new NetworkResponse(
+                        emp.getId(),
+                        emp.getEmployeeId(),
+                        emp.getName(),
+                        emp.getEmail(),
+                        emp.getDesignation(),
+                        emp.getDepartment().getDepartmentName(),
+                        emp.getProfileImage()
+                ))
+                .collect(Collectors.toList());
+
+        if (results.isEmpty()) {
+            throw new EmployeeNotFoundException(
+                    "No employee found with name \"" + name + "\" in your department");
+        }
+
+        return results;
     }
 
     @Override
