@@ -4,6 +4,7 @@ import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
 import com.cyber_employee_portal.dto.AnniversaryResponse;
 import com.cyber_employee_portal.dto.BirthdayResponse;
+import com.cyber_employee_portal.dto.CalendarResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.dto.UpdateEmployeeRequest;
@@ -33,15 +34,12 @@ import com.cyber_employee_portal.dto.ResetPasswordRequest;
 import com.cyber_employee_portal.exception.InvalidOtpException;
 import com.cyber_employee_portal.service.EmailService;
 
-<<<<<<< HEAD
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 
-=======
 import java.security.SecureRandom;
 import java.text.CollationElementIterator;
 import java.time.LocalDateTime;
@@ -50,383 +48,314 @@ import com.cyber_employee_portal.dto.NetworkResponse;
 import java.util.stream.Collectors;
 
 import java.util.Arrays;
- 
->>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
+
 @Service
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
-    private final EmployeeRepository employeeRepository;
-    private final RoleRepository roleRepository;
-    private  final AdminUserRepository adminUserRepository;
-    private final PasswordEncoder passwordEncoder;
+	private final EmployeeRepository employeeRepository;
+	private final RoleRepository roleRepository;
+	private final AdminUserRepository adminUserRepository;
+	private final PasswordEncoder passwordEncoder;
 
-    private final DepartmentRepository  departmentRepository;
+	private final DepartmentRepository departmentRepository;
 
-    private final EmailService emailService;
+	private final EmailService emailService;
 
+	@Override
+	@Transactional
+	public RegisterResponse register(RegisterRequest request) {
 
-    @Override
-    @Transactional
-    public RegisterResponse register(RegisterRequest request) {
+		// 1. Validate employeeId exists in AdminUsers table (pre-issued by admin)
+		AdminUsers adminUser = adminUserRepository.findByEmployeeId(request.getEmployeeId())
+				.orElseThrow(() -> new InvalidEmployeeIdException(
+						"Invalid Employee ID. This ID was not issued by admin: " + request.getEmployeeId()));
 
-        // 1. Validate employeeId exists in AdminUsers table (pre-issued by admin)
-        AdminUsers adminUser = adminUserRepository.findByEmployeeId(request.getEmployeeId())
-                .orElseThrow(() -> new InvalidEmployeeIdException(
-                        "Invalid Employee ID. This ID was not issued by admin: " + request.getEmployeeId()));
+		// 2. Prevent reusing an employeeId that's already been registered
+		if (employeeRepository.existsByEmployeeId(request.getEmployeeId())) {
+			throw new InvalidEmployeeIdException(
+					"This Employee ID has already been used to register: " + request.getEmployeeId());
+		}
 
-        // 2. Prevent reusing an employeeId that's already been registered
-        if (employeeRepository.existsByEmployeeId(request.getEmployeeId())) {
-            throw new InvalidEmployeeIdException(
-                    "This Employee ID has already been used to register: " + request.getEmployeeId());
-        }
+		// 3. Prevent duplicate email registration
+		if (employeeRepository.existsByEmail(request.getEmail())) {
+			throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
+		}
 
-        // 3. Prevent duplicate email registration
-        if (employeeRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
-        }
+		// 4. Resolve role — default to EMPLOYEE if not provided
+		String roleName = (request.getRoleName() == null || request.getRoleName().isBlank()) ? "EMPLOYEE"
+				: request.getRoleName().toUpperCase();
 
-        // 4. Resolve role — default to EMPLOYEE if not provided
-        String roleName = (request.getRoleName() == null || request.getRoleName().isBlank())
-                ? "EMPLOYEE"
-                : request.getRoleName().toUpperCase();
+		Role role = roleRepository.findByName(roleName)
+				.orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
 
-        Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
-        
-        
-        
-        Department department = departmentRepository.findByDepartmentName(request.getDepartment())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Invalid department: " + request.getDepartment()));
+		Department department = departmentRepository.findByDepartmentName(request.getDepartment())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid department: " + request.getDepartment()));
 
-<<<<<<< HEAD
-=======
-        // 5. Build employee entity
->>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
-        Employee employee = new Employee();
-        employee.setName(request.getName());
-        employee.setEmail(request.getEmail());
-        employee.setPassword(passwordEncoder.encode(request.getPassword()));
-        employee.setEmployeeId(request.getEmployeeId());
-        employee.setPhoneNumber(request.getPhoneNumber());
-        employee.setDateOfBirth(request.getDateOfBirth());
-        employee.setGender(request.getGender());
-        employee.setBloodGroup(request.getBloodGroup());
-        employee.setMaritalStatus(request.getMaritalStatus());
-        employee.setNationality(request.getNationality());
-        employee.setAddress(request.getAddress());
-        employee.setCity(request.getCity());
-        employee.setState(request.getState());
-        employee.setCountry(request.getCountry());
-        employee.setPincode(request.getPincode());
-        employee.setDepartment(department);
-        employee.setDesignation(request.getDesignation());
-        employee.setEmploymentType(request.getEmploymentType());
-        employee.setJoiningDate(request.getJoiningDate());
-        employee.setSalary(request.getSalary());
-        employee.setManagerId(request.getManagerId());
-        employee.setEmergencyContactName(request.getEmergencyContactName());
-        employee.setEmergencyContactNumber(request.getEmergencyContactNumber());
-        employee.setProfileImage(request.getProfileImage());
-        employee.setRole(role);
-        employee.setActive(true);
-        employee.setEmailVerified(false);
+		// 5. Build employee entity
 
-        Employee saved = employeeRepository.save(employee);
+		Employee employee = new Employee();
+		employee.setName(request.getName());
+		employee.setEmail(request.getEmail());
+		employee.setPassword(passwordEncoder.encode(request.getPassword()));
+		employee.setEmployeeId(request.getEmployeeId());
+		employee.setPhoneNumber(request.getPhoneNumber());
+		employee.setDateOfBirth(request.getDateOfBirth());
+		employee.setGender(request.getGender());
+		employee.setBloodGroup(request.getBloodGroup());
+		employee.setMaritalStatus(request.getMaritalStatus());
+		employee.setNationality(request.getNationality());
+		employee.setAddress(request.getAddress());
+		employee.setCity(request.getCity());
+		employee.setState(request.getState());
+		employee.setCountry(request.getCountry());
+		employee.setPincode(request.getPincode());
+		employee.setDepartment(department);
+		employee.setDesignation(request.getDesignation());
+		employee.setEmploymentType(request.getEmploymentType());
+		employee.setJoiningDate(request.getJoiningDate());
+		employee.setSalary(request.getSalary());
+		employee.setManagerId(request.getManagerId());
+		employee.setEmergencyContactName(request.getEmergencyContactName());
+		employee.setEmergencyContactNumber(request.getEmergencyContactNumber());
+		employee.setProfileImage(request.getProfileImage());
+		employee.setRole(role);
+		employee.setActive(true);
+		employee.setEmailVerified(false);
 
-        return new RegisterResponse(
-                saved.getId(),
-                saved.getEmployeeId(),
-                saved.getName(),
-                saved.getEmail(),
-                saved.getRole().getName(),
-                saved.getGender(),
-                "Employee registered successfully"
-        );
-    }
+		Employee saved = employeeRepository.save(employee);
 
-    @Override
-    @Transactional
-    public AdminUserResponse generateEmpId(AdminUserRequest request) {
-    	if (adminUserRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
-        }
-    	
-    	String employeeId = generateEmployeeId();
-    	
-    	AdminUsers adminUsers=new AdminUsers(); 
-    	adminUsers.setEmail(request.getEmail());
-    	adminUsers.setEmployeeId(employeeId);
-    	
-    	AdminUsers saved = adminUserRepository.save(adminUsers);
-    	
-    	return new AdminUserResponse(
-    			saved.getEmail(),
-                saved.getEmployeeId()
-        );
-    }
+		return new RegisterResponse(saved.getId(), saved.getEmployeeId(), saved.getName(), saved.getEmail(),
+				saved.getRole().getName(), saved.getGender(), "Employee registered successfully");
+	}
 
-    private String generateEmployeeId() {
-        long count = adminUserRepository.count() + 1;
-        return String.format("EMPl%04d", count);
-    }
+	@Override
+	@Transactional
+	public AdminUserResponse generateEmpId(AdminUserRequest request) {
+		if (adminUserRepository.existsByEmail(request.getEmail())) {
+			throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
+		}
 
-    @Override
-    @Transactional
-    public RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request) {
+		String employeeId = generateEmployeeId();
 
-        Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
+		AdminUsers adminUsers = new AdminUsers();
+		adminUsers.setEmail(request.getEmail());
+		adminUsers.setEmployeeId(employeeId);
 
-        BeanUtils.copyProperties(request, employee, getNullPropertyNames(request));
+		AdminUsers saved = adminUserRepository.save(adminUsers);
 
-        if (request.getPassword() != null) {
-            employee.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
+		return new AdminUserResponse(saved.getEmail(), saved.getEmployeeId());
+	}
 
-        Employee saved = employeeRepository.save(employee);
+	private String generateEmployeeId() {
+		long count = adminUserRepository.count() + 1;
+		return String.format("EMPl%04d", count);
+	}
 
-        return new RegisterResponse(
-                saved.getId(),
-                saved.getEmployeeId(),
-                saved.getName(),
-                saved.getEmail(),
-                saved.getRole().getName(),
-<<<<<<< HEAD
-                saved.getGender(),
-=======
->>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
-                "Employee updated successfully"
-        );
-    }
+	@Override
+	@Transactional
+	public RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request) {
 
-  
-    private String[] getNullPropertyNames(Object source) {
-        BeanWrapper wrapper = new BeanWrapperImpl(source);
-        return Arrays.stream(wrapper.getPropertyDescriptors())
-                .map(java.beans.PropertyDescriptor::getName)
-                .filter(name -> wrapper.getPropertyValue(name) == null)
-                .toArray(String[]::new);
-    }
-<<<<<<< HEAD
-=======
-    
+		Employee employee = employeeRepository.findById(id)
+				.orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
+
+		BeanUtils.copyProperties(request, employee, getNullPropertyNames(request));
+
+		if (request.getPassword() != null) {
+			employee.setPassword(passwordEncoder.encode(request.getPassword()));
+		}
+
+		Employee saved = employeeRepository.save(employee);
+
+		return new RegisterResponse(saved.getId(), saved.getEmployeeId(), saved.getName(), saved.getEmail(),
+				saved.getRole().getName(),
+
+				saved.getGender(),
+
+				"Employee updated successfully");
+	}
+
+	private String[] getNullPropertyNames(Object source) {
+		BeanWrapper wrapper = new BeanWrapperImpl(source);
+		return Arrays.stream(wrapper.getPropertyDescriptors()).map(java.beans.PropertyDescriptor::getName)
+				.filter(name -> wrapper.getPropertyValue(name) == null).toArray(String[]::new);
+	}
+
 //    ---------------------------forgot password service logic-----------------------------------------------------
-    
-    @Override
-    @Transactional
-    public String forgotPassword(ForgotPasswordRequest request) {
 
-        Employee employee = employeeRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new EmployeeNotFoundException(
-                        "No employee found with email: " + request.getEmail()));
+	@Override
+	@Transactional
+	public String forgotPassword(ForgotPasswordRequest request) {
 
-        String otp = generateOtp();
+		Employee employee = employeeRepository.findByEmail(request.getEmail()).orElseThrow(
+				() -> new EmployeeNotFoundException("No employee found with email: " + request.getEmail()));
 
-        employee.setOtp(otp);
-        employee.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
-        employeeRepository.save(employee);
+		String otp = generateOtp();
 
-        emailService.sendOtpEmail(employee.getEmail(), otp);
+		employee.setOtp(otp);
+		employee.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
+		employeeRepository.save(employee);
 
-        return "OTP sent successfully to " + request.getEmail();
-    }
-    @Override
-    public List<NetworkResponse> getMyNetwork(String email) {
+		emailService.sendOtpEmail(employee.getEmail(), otp);
 
-        Employee currentEmployee = employeeRepository.findByEmail(email)
-                .orElseThrow(() -> new EmployeeNotFoundException(
-                        "No employee found with email: " + email));
+		return "OTP sent successfully to " + request.getEmail();
+	}
 
-        if (currentEmployee.getDepartment() == null) {
-            return List.of();
-        }
+	@Override
+	public List<NetworkResponse> getMyNetwork(String email) {
 
-        return employeeRepository.findByDepartment_Id(currentEmployee.getDepartment().getId())
-                .stream()
-                .filter(emp -> !emp.getId().equals(currentEmployee.getId()))
-                .map(emp -> new NetworkResponse(
-                        emp.getId(),
-                        emp.getEmployeeId(),
-                        emp.getName(),
-                        emp.getEmail(),
-                        emp.getDesignation(),
-                        emp.getDepartment().getDepartmentName(),
-                        emp.getProfileImage()
-                ))
-                .collect(Collectors.toList());
-    }
-    @Override
-    public List<NetworkResponse> findPeopleByName(String email, String name) {
+		Employee currentEmployee = employeeRepository.findByEmail(email)
+				.orElseThrow(() -> new EmployeeNotFoundException("No employee found with email: " + email));
 
-        Employee currentEmployee = employeeRepository.findByEmail(email)
-                .orElseThrow(() -> new EmployeeNotFoundException(
-                        "No employee found with email: " + email));
+		if (currentEmployee.getDepartment() == null) {
+			return List.of();
+		}
 
-        if (currentEmployee.getDepartment() == null) {
-            return List.of();
-        }
+		return employeeRepository.findByDepartment_Id(currentEmployee.getDepartment().getId()).stream()
+				.filter(emp -> !emp.getId().equals(currentEmployee.getId()))
+				.map(emp -> new NetworkResponse(emp.getId(), emp.getEmployeeId(), emp.getName(), emp.getEmail(),
+						emp.getDesignation(), emp.getDepartment().getDepartmentName(), emp.getProfileImage()))
+				.collect(Collectors.toList());
+	}
 
-        List<NetworkResponse> results = employeeRepository
-                .findByDepartment_IdAndNameContainingIgnoreCase(currentEmployee.getDepartment().getId(), name)
-                .stream()
-                .filter(emp -> !emp.getId().equals(currentEmployee.getId()))
-                .map(emp -> new NetworkResponse(
-                        emp.getId(),
-                        emp.getEmployeeId(),
-                        emp.getName(),
-                        emp.getEmail(),
-                        emp.getDesignation(),
-                        emp.getDepartment().getDepartmentName(),
-                        emp.getProfileImage()
-                ))
-                .collect(Collectors.toList());
+	@Override
+	public List<NetworkResponse> findPeopleByName(String email, String name) {
 
-        if (results.isEmpty()) {
-            throw new EmployeeNotFoundException(
-                    "No employee found with name \"" + name + "\" in your department");
-        }
+		Employee currentEmployee = employeeRepository.findByEmail(email)
+				.orElseThrow(() -> new EmployeeNotFoundException("No employee found with email: " + email));
 
-        return results;
-    }
+		if (currentEmployee.getDepartment() == null) {
+			return List.of();
+		}
 
-    @Override
-    @Transactional
-    public String resetPassword(ResetPasswordRequest request) {
+		List<NetworkResponse> results = employeeRepository
+				.findByDepartment_IdAndNameContainingIgnoreCase(currentEmployee.getDepartment().getId(), name).stream()
+				.filter(emp -> !emp.getId().equals(currentEmployee.getId()))
+				.map(emp -> new NetworkResponse(emp.getId(), emp.getEmployeeId(), emp.getName(), emp.getEmail(),
+						emp.getDesignation(), emp.getDepartment().getDepartmentName(), emp.getProfileImage()))
+				.collect(Collectors.toList());
 
-        Employee employee = employeeRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new EmployeeNotFoundException(
-                        "No employee found with email: " + request.getEmail()));
+		if (results.isEmpty()) {
+			throw new EmployeeNotFoundException("No employee found with name \"" + name + "\" in your department");
+		}
 
-        // Check OTP exists
-        if (employee.getOtp() == null) {
-            throw new InvalidOtpException("No OTP request found. Please request a new OTP.");
-        }
+		return results;
+	}
 
-        // Check OTP matches
-        if (!employee.getOtp().equals(request.getOtp())) {
-            throw new InvalidOtpException("Invalid OTP");
-        }
+	@Override
+	@Transactional
+	public String resetPassword(ResetPasswordRequest request) {
 
-        // Check OTP hasn't expired
-        if (employee.getOtpExpiry() == null || employee.getOtpExpiry().isBefore(LocalDateTime.now())) {
-            throw new InvalidOtpException("OTP has expired. Please request a new one.");
-        }
+		Employee employee = employeeRepository.findByEmail(request.getEmail()).orElseThrow(
+				() -> new EmployeeNotFoundException("No employee found with email: " + request.getEmail()));
 
-        // All checks passed — update password (encrypted)
-        employee.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		// Check OTP exists
+		if (employee.getOtp() == null) {
+			throw new InvalidOtpException("No OTP request found. Please request a new OTP.");
+		}
 
-        // Clear OTP so it can't be reused
-        employee.setOtp(null);
-        employee.setOtpExpiry(null);
+		// Check OTP matches
+		if (!employee.getOtp().equals(request.getOtp())) {
+			throw new InvalidOtpException("Invalid OTP");
+		}
 
-        employeeRepository.save(employee);
+		// Check OTP hasn't expired
+		if (employee.getOtpExpiry() == null || employee.getOtpExpiry().isBefore(LocalDateTime.now())) {
+			throw new InvalidOtpException("OTP has expired. Please request a new one.");
+		}
 
-        return "Password reset successfully";
-    }
+		// All checks passed — update password (encrypted)
+		employee.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
-    private String generateOtp() {
-        SecureRandom random = new SecureRandom();
-        int otp = 100000 + random.nextInt(900000); // always 6 digits
-        return String.valueOf(otp);
-    }
->>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
+		// Clear OTP so it can't be reused
+		employee.setOtp(null);
+		employee.setOtpExpiry(null);
 
-    @Override
-    @Transactional
-    public void deleteEmployee(Long id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new EmployeeNotFoundException("Employee not found with id: " + id);
-        }
-        employeeRepository.deleteById(id);
-    }
-<<<<<<< HEAD
-    
-    @Override
-    public List<BirthdayResponse> getTodayBirthdays() {
+		employeeRepository.save(employee);
 
-        return employeeRepository.findTodayBirthdays()
-                .stream()
-                .map(e -> new BirthdayResponse(
-                        e.getId(),
-                        e.getName(),
-                        e.getEmployeeId(),
-                        e.getDepartment(),
-                        e.getDesignation(),
-                        e.getDateOfBirth(),
-                        e.getProfileImage(),
-                        "🎉 Happy Birthday, " + e.getName() + "!"
-                ))
-                .collect(Collectors.toList());
-    }
-        @Override
-        public List<AnniversaryResponse> getTodayAnniversaries() {
-            return employeeRepository.findTodayAnniversaries()
-                    .stream()
-                    .map(e -> new AnniversaryResponse(
-                            e.getId(),
-                            e.getName(),
-                            e.getEmployeeId(),
-                            e.getDepartment(),
-                            e.getDesignation(),
-                            e.getJoiningDate()
-                    ))
-                    .collect(Collectors.toList());
-        
-    }
-        @Override
-        public List<BirthdayResponse> getUpcomingBirthdays() {
+		return "Password reset successfully";
+	}
 
-            return employeeRepository.findUpcomingBirthdays()
-                    .stream()
-                    .map(e -> new BirthdayResponse(
-                            e.getId(),
-                            e.getName(),
-                            e.getEmployeeId(),
-                            e.getDepartment(),
-                            e.getDesignation(),
-                            e.getDateOfBirth(),
-                            e.getProfileImage(),
-                            "🎂 Upcoming Birthday: " + e.getName()
-                    ))
-                    .collect(Collectors.toList());
-        }
-        @Override
-        public List<BirthdayResponse> getBirthdayList() {
+	private String generateOtp() {
+		SecureRandom random = new SecureRandom();
+		int otp = 100000 + random.nextInt(900000); // always 6 digits
+		return String.valueOf(otp);
+	}
 
-            List<BirthdayResponse> birthdayList = new java.util.ArrayList<>();
+	@Override
+	@Transactional
+	public void deleteEmployee(Long id) {
+		if (!employeeRepository.existsById(id)) {
+			throw new EmployeeNotFoundException("Employee not found with id: " + id);
+		}
+		employeeRepository.deleteById(id);
+	}
 
-            // Today's Birthdays
-            birthdayList.addAll(getTodayBirthdays());
+	@Override
+	@Transactional
+	public List<BirthdayResponse> getTodayBirthdays() {
 
-            // Upcoming Birthdays
-            birthdayList.addAll(getUpcomingBirthdays());
+		return employeeRepository.findTodayBirthdays().stream()
+				.map(e -> new BirthdayResponse(e.getId(), e.getName(), e.getEmployeeId(),
+						e.getDepartment().getDepartmentName(), e.getDesignation(), e.getDateOfBirth(),
+						e.getProfileImage(), "🎉 Happy Birthday, " + e.getName() + "!"))
+				.collect(Collectors.toList());
+	}
 
-            return birthdayList;
-        }
-        @Override
-        public List<RegisterResponse> getEmployeesByGender(String gender) {
+	@Override
+	public List<AnniversaryResponse> getTodayAnniversaries() {
+		return employeeRepository.findTodayAnniversaries().stream()
+				.map(e -> new AnniversaryResponse(e.getId(), e.getName(), e.getEmployeeId(),
+						e.getDepartment().getDepartmentName(), e.getDesignation(), e.getJoiningDate()))
+				.collect(Collectors.toList());
 
-            List<Employee> employees = employeeRepository.findByGender(gender);
+	}
 
-            return employees.stream()
-                    .map(employee -> new RegisterResponse(
-                            employee.getId(),
-                            employee.getEmployeeId(),
-                            employee.getName(),
-                            employee.getEmail(),
-                            employee.getRole() != null ? employee.getRole().getName() : "N/A",
-                            employee.getGender(),
-                            "Employee fetched successfully"
-                    ))
-                    .collect(Collectors.toList());
-        }
-        @Override
-        public CurrentDateTimeResponse getCurrentDateTime() {
-            return new CurrentDateTimeResponse(LocalDateTime.now());
-        }
-    
-=======
->>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
+	@Override
+	public List<BirthdayResponse> getUpcomingBirthdays() {
+
+		return employeeRepository.findUpcomingBirthdays().stream()
+				.map(e -> new BirthdayResponse(e.getId(), e.getName(), e.getEmployeeId(),
+						e.getDepartment().getDepartmentName(), e.getDesignation(), e.getDateOfBirth(),
+						e.getProfileImage(), "🎂 Upcoming Birthday: " + e.getName()))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<BirthdayResponse> getBirthdayList() {
+
+		List<BirthdayResponse> birthdayList = new java.util.ArrayList<>();
+
+		// Today's Birthdays
+		birthdayList.addAll(getTodayBirthdays());
+
+		// Upcoming Birthdays
+		birthdayList.addAll(getUpcomingBirthdays());
+
+		return birthdayList;
+	}
+
+	@Override
+	public List<RegisterResponse> getEmployeesByGender(String gender) {
+
+		List<Employee> employees = employeeRepository.findByGender(gender);
+
+		return employees.stream()
+				.map(employee -> new RegisterResponse(employee.getId(), employee.getEmployeeId(), employee.getName(),
+						employee.getEmail(), employee.getRole() != null ? employee.getRole().getName() : "N/A",
+						employee.getGender(), "Employee fetched successfully"))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public CurrentDateTimeResponse getCurrentDateTime() {
+		return new CurrentDateTimeResponse(LocalDateTime.now());
+	}
+
+	@Override
+	public List<CalendarResponse> getCalendarEvents() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

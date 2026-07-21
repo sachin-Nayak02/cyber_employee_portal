@@ -16,17 +16,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-<<<<<<< HEAD
+
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-=======
 import java.util.*;
 
 import org.springframework.http.ResponseEntity;
 import com.cyber_employee_portal.dto.ForgotPasswordRequest;
 import com.cyber_employee_portal.dto.ResetPasswordRequest;
 
->>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
+
 import org.springframework.web.bind.annotation.*;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 
@@ -59,8 +58,7 @@ public class EmployeeController {
                                                             @Valid @RequestBody UpdateEmployeeRequest request) {
         RegisterResponse response = employeeService.updateEmployee(id, request);
         return ResponseEntity.ok(response);
-<<<<<<< HEAD
-=======
+
     }
     
     @Operation(summary = "Request OTP for password reset")
@@ -79,7 +77,7 @@ public class EmployeeController {
         Map<String, String> response = new HashMap<>();
         response.put("message", message);
         return ResponseEntity.ok(response);
->>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
+
     }
  
     @Operation(summary = "Delete an employee by id")
@@ -92,7 +90,7 @@ public class EmployeeController {
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<String> handleNotFound(EmployeeNotFoundException e) {
         return ResponseEntity.status(404).body(e.getMessage());
-<<<<<<< HEAD
+
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
@@ -129,13 +127,12 @@ public class EmployeeController {
     @GetMapping("/currentDateTime")
     public ResponseEntity<CurrentDateTimeResponse> getCurrentDateTime() {
         return ResponseEntity.ok(employeeService.getCurrentDateTime());
-=======
->>>>>>> 00ea78f16764d288781d597d49997294f6715b4b
+
     }
 
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
-        return ResponseEntity.status(400).body(e.getMessage()); 
-    }
+//    @ExceptionHandler(EmailAlreadyExistsException.class)
+//    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
+//        return ResponseEntity.status(400).body(e.getMessage()); 
+//    }
     
 }
