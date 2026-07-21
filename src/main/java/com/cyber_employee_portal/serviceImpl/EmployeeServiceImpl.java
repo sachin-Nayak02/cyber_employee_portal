@@ -6,12 +6,14 @@ import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.dto.UpdateEmployeeRequest;
 import com.cyber_employee_portal.entity.AdminUsers;
+import com.cyber_employee_portal.entity.Department;
 import com.cyber_employee_portal.entity.Employee;
 import com.cyber_employee_portal.entity.Role;
 import com.cyber_employee_portal.exception.EmailAlreadyExistsException;
 import com.cyber_employee_portal.exception.EmployeeNotFoundException;
 import com.cyber_employee_portal.exception.InvalidEmployeeIdException;
 import com.cyber_employee_portal.repository.AdminUserRepository;
+import com.cyber_employee_portal.repository.DepartmentRepository;
 import com.cyber_employee_portal.repository.EmployeeRepository;
 import com.cyber_employee_portal.repository.RoleRepository;
 import com.cyber_employee_portal.service.EmployeeService;
@@ -42,7 +44,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final RoleRepository roleRepository;
     private  final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final DepartmentRepository  departmentRepository;
+
     private final EmailService emailService;
+
 
     @Override
     @Transactional
@@ -71,6 +77,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
+        
+        
+        
+        Department department = departmentRepository.findByDepartmentName(request.getDepartment())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Invalid department: " + request.getDepartment()));
 
         // 5. Build employee entity
         Employee employee = new Employee();
@@ -89,7 +101,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setState(request.getState());
         employee.setCountry(request.getCountry());
         employee.setPincode(request.getPincode());
-        employee.setDepartment(request.getDepartment());
+        employee.setDepartment(department);
         employee.setDesignation(request.getDesignation());
         employee.setEmploymentType(request.getEmploymentType());
         employee.setJoiningDate(request.getJoiningDate());

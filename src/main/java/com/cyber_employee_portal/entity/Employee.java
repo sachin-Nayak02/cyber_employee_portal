@@ -82,8 +82,9 @@ public class Employee implements UserDetails{
     @Column
     private String pincode;
 
-    @Column
-    private String department;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     @Column
     private String designation; 
@@ -121,11 +122,16 @@ public class Employee implements UserDetails{
     @Column 
     private LocalDateTime updatedAt; 
     
+
+   
+
+
     @Column
     private String otp;
 
     @Column
     private LocalDateTime otpExpiry;
+
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
