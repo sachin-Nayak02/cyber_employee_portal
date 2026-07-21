@@ -37,7 +37,7 @@ public class AuthController {
     private final EmployeeRepository employeeRepository;
 
     // Must match JwtUtil's token expiration duration (currently 10 hours)
-    private static final long SESSION_HOURS = 10;
+    private static final long SESSION_HOURS = 24;
 
 
     @PostMapping("/login")
