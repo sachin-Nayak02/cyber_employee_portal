@@ -124,6 +124,7 @@ public class Employee implements UserDetails{
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
+    
 
     // ===== UserDetails methods (required by Spring Security) =====
 

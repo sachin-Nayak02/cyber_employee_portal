@@ -2,6 +2,8 @@ package com.cyber_employee_portal.controller;
 
 import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
+import com.cyber_employee_portal.dto.AnniversaryResponse;
+import com.cyber_employee_portal.dto.BirthdayResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.dto.UpdateEmployeeRequest;
@@ -12,9 +14,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
+import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
 @RestController
@@ -38,11 +42,12 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
     
-    @Operation(summary = "Partially update an employee (only supplied fields change)")
+    @Operation(summary = "Update an employee (only the fields you send get changed)")
     @PatchMapping("/update/{id}")
-    public ResponseEntity<?> patchUpdate(@PathVariable Long id,
-                                          @Valid @RequestBody UpdateEmployeeRequest request) {
-        return handleUpdate(id, request, true);
+    public ResponseEntity<RegisterResponse> updateEmployee(@PathVariable Long id,
+                                                            @Valid @RequestBody UpdateEmployeeRequest request) {
+        RegisterResponse response = employeeService.updateEmployee(id, request);
+        return ResponseEntity.ok(response);
     }
  
     @Operation(summary = "Delete an employee by id")
@@ -51,24 +56,45 @@ public class EmployeeController {
         employeeService.deleteEmployee(id);
         return ResponseEntity.noContent().build();
     }
-    
-//    @Operation(summary = "Fully replace an employee's editable fields")
-//    @PutMapping("/update/{id}")
-//    public ResponseEntity<?> putUpdate(@PathVariable Long id,
-//                                        @Valid @RequestBody UpdateEmployeeRequest request) {
-//        return handleUpdate(id, request, false);
-//    }
 
-    private ResponseEntity<?> handleUpdate(Long id, UpdateEmployeeRequest request, boolean isPartial) {
-        try {
-            RegisterResponse response = employeeService.updateEmployee(id, request, isPartial);
-            return ResponseEntity.ok(response);
-        } catch (EmployeeNotFoundException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (AccessDeniedException e) { 
-            return ResponseEntity.status(403).body(e.getMessage());
-        } catch (EmailAlreadyExistsException | IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+    @ExceptionHandler(EmployeeNotFoundException.class)
+    public ResponseEntity<String> handleNotFound(EmployeeNotFoundException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
+        return ResponseEntity.status(400).body(e.getMessage());
+    }
+    @GetMapping("/birthdays/today")
+    public ResponseEntity<List<BirthdayResponse>> getTodayBirthdays() {
+        return ResponseEntity.ok(employeeService.getTodayBirthdays());
+    }
+    @GetMapping("/anniversaries/today")
+    public ResponseEntity<List<AnniversaryResponse>> getTodayAnniversaries() {
+        return ResponseEntity.ok(employeeService.getTodayAnniversaries());
+    }
+    @GetMapping("/birthdays/upcoming")
+    public ResponseEntity<List<BirthdayResponse>> getUpcomingBirthdays() {
+
+        return ResponseEntity.ok(employeeService.getUpcomingBirthdays());
+
+    }
+    @Operation(summary = "Get Today and Upcoming Birthdays")
+    @GetMapping("/birthdays")
+    public ResponseEntity<List<BirthdayResponse>> getBirthdayList() {
+
+        return ResponseEntity.ok(employeeService.getBirthdayList());
+
+    }
+    @GetMapping("/gender/{gender}")
+    public ResponseEntity<List<RegisterResponse>> getEmployeesByGender(
+            @PathVariable String gender) {
+
+        return ResponseEntity.ok(employeeService.getEmployeesByGender(gender));
+    }
+    @GetMapping("/currentDateTime")
+    public ResponseEntity<CurrentDateTimeResponse> getCurrentDateTime() {
+        return ResponseEntity.ok(employeeService.getCurrentDateTime());
     }
 }
