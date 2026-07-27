@@ -48,9 +48,6 @@ public interface EmployeeService {
 	 CurrentDateTimeResponse getCurrentDateTime();
 	 
 
- 
-
-//	AdminUserResponse generateEmpId(AdminUserRequest request);
 	String forgotPassword(ForgotPasswordRequest request);
     String resetPassword(ResetPasswordRequest request);
    

@@ -11,4 +11,5 @@ public class AdminUserResponse {
 
 	    private String email;
 	    private String employeeId;
+	    private Double salary;
 }
