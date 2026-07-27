@@ -43,22 +43,27 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.PATCH, "/api/auth/update/**").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/auth/update/**").authenticated()
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(
-                		"/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html",
-                        "/webjars/**",
-                        "/error"
-                		).permitAll()   
-                .anyRequest().authenticated()
-            )
+            	    .requestMatchers(HttpMethod.PATCH, "/api/auth/update/**").authenticated()
+            	    .requestMatchers(HttpMethod.PUT, "/api/auth/update/**").authenticated()
+
+            	    .requestMatchers("/api/auth/**").permitAll()
+
+            	    .requestMatchers("/api/holidayList/**").permitAll()
+
+            	    .requestMatchers(
+            	            "/v3/api-docs/**",
+            	            "/swagger-ui/**",
+            	            "/swagger-ui.html",
+            	            "/webjars/**",
+            	            "/error"
+            	    ).permitAll()
+
+            	    .anyRequest().authenticated()
+            	)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
