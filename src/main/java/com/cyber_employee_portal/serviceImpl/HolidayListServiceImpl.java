@@ -2,12 +2,13 @@ package com.cyber_employee_portal.serviceImpl;
 
 import java.util.List;
 
+
 import org.springframework.stereotype.Service;
 
 import com.cyber_employee_portal.entity.HolidayList;
 import com.cyber_employee_portal.repository.HolidayListRepository;
 import com.cyber_employee_portal.service.HolidayListService;
-
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,6 +25,13 @@ public class HolidayListServiceImpl implements HolidayListService {
     @Override
     public List<HolidayList> getAllHolidays() {
         return holidayListRepository.findAll();
+    }
+    @Override
+    public List<HolidayList> getUpcomingHolidays() {
+
+        return holidayListRepository
+                .findByHolidayDateGreaterThanEqualOrderByHolidayDateAsc(LocalDate.now());
+
     }
 
 }

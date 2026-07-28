@@ -10,6 +10,8 @@ import java.time.Month;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.format.TextStyle;
+import java.util.Locale;
 
 @Service
 public class CalendarServiceImpl implements CalendarService {
@@ -27,7 +29,9 @@ public class CalendarServiceImpl implements CalendarService {
 
             CalendarDayResponse day = new CalendarDayResponse();
 
-            day.setDay(i);
+            day.setDay(
+            	    date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH)
+            	);
             day.setDate(date.toString());
 
             // Default values

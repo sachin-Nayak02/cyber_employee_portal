@@ -48,12 +48,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
         	.cors(cors -> cors.configurationSource(corsConfigurationSource()))
         	.csrf(csrf -> csrf.disable())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+
                 .requestMatchers(HttpMethod.PATCH, "/api/auth/update/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/auth/update/**").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
@@ -70,6 +71,9 @@ public class SecurityConfig {
                         ).permitAll()   
                 .anyRequest().authenticated()
             )
+
+            	    
+
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())

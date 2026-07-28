@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CalendarDayResponse {
 
-    private Integer day;
+    private String day;
     private String date;
     private boolean holiday;
     private boolean birthday;
