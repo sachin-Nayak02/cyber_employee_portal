@@ -11,6 +11,7 @@ import com.cyber_employee_portal.entity.AdminUsers;
 public interface AdminUserRepository extends JpaRepository<AdminUsers,Long >{
 	Optional<AdminUserRepository> findByEmail(String email);
 	 boolean existsByEmail(String email);
-
+	 Optional<AdminUsers> findByEmployeeId(String employeeId);
+ 
 }
 

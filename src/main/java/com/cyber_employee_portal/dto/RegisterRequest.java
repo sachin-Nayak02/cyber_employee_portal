@@ -27,6 +27,7 @@ public class RegisterRequest {
 
     private String gender;
     
+    @NotBlank(message = "Employee ID is required")
     private String employeeId;
 
     private String department;
@@ -59,17 +60,10 @@ public class RegisterRequest {
 
 
     
-    //----------------
-
-    // If not provided, defaults to "EMPLOYEE" in the service layer
+  
     private String roleName;
 
 
-
-//	public String getEmployeeId() { 
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
 
 
 

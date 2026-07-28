@@ -7,16 +7,18 @@ import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.dto.UpdateEmployeeRequest;
 import com.cyber_employee_portal.entity.AdminUsers;
+import com.cyber_employee_portal.entity.Department;
 import com.cyber_employee_portal.entity.Employee;
 import com.cyber_employee_portal.entity.Role;
 import com.cyber_employee_portal.exception.EmailAlreadyExistsException;
 import com.cyber_employee_portal.exception.EmployeeNotFoundException;
+import com.cyber_employee_portal.exception.InvalidEmployeeIdException;
 import com.cyber_employee_portal.repository.AdminUserRepository;
+import com.cyber_employee_portal.repository.DepartmentRepository;
 import com.cyber_employee_portal.repository.EmployeeRepository;
 import com.cyber_employee_portal.repository.RoleRepository;
 import com.cyber_employee_portal.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -24,9 +26,23 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.cyber_employee_portal.dto.ForgotPasswordRequest;
+import com.cyber_employee_portal.dto.ResetPasswordRequest;
+import com.cyber_employee_portal.exception.InvalidOtpException;
+import com.cyber_employee_portal.service.EmailService;
+
 
 import java.util.Arrays;
 import java.util.List;
+
+
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+
+
+
+
+ 
 
 @Service
 @RequiredArgsConstructor
@@ -39,20 +55,48 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final ModelMapper modelMapper;
     
 
+    private final DepartmentRepository  departmentRepository;
+
+    private final EmailService emailService;
+
+
     @Override
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
 
+        // 1. Validate employeeId exists in AdminUsers table (pre-issued by admin)
+        AdminUsers adminUser = adminUserRepository.findByEmployeeId(request.getEmployeeId())
+                .orElseThrow(() -> new InvalidEmployeeIdException(
+                        "Invalid Employee ID. This ID was not issued by admin: " + request.getEmployeeId()));
+
+        // 2. Prevent reusing an employeeId that's already been registered
+        if (employeeRepository.existsByEmployeeId(request.getEmployeeId())) {
+            throw new InvalidEmployeeIdException(
+                    "This Employee ID has already been used to register: " + request.getEmployeeId());
+        }
+
+        // 3. Prevent duplicate email registration
         if (employeeRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
         }
 
+        // 4. Resolve role — default to EMPLOYEE if not provided
         String roleName = (request.getRoleName() == null || request.getRoleName().isBlank())
                 ? "EMPLOYEE"
                 : request.getRoleName().toUpperCase();
 
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
+        
+        
+        
+        Department department = departmentRepository.findByDepartmentName(request.getDepartment())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Invalid department: " + request.getDepartment()));
+
+
+
+       
 
         Employee employee = new Employee();
         employee.setName(request.getName());
@@ -70,7 +114,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setState(request.getState());
         employee.setCountry(request.getCountry());
         employee.setPincode(request.getPincode());
-        employee.setDepartment(request.getDepartment());
+        employee.setDepartment(department);
         employee.setDesignation(request.getDesignation());
         employee.setEmploymentType(request.getEmploymentType());
         employee.setJoiningDate(request.getJoiningDate());
@@ -94,7 +138,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 "Employee registered successfully"
         );
     }
- 
+
     @Override
     @Transactional
     public AdminUserResponse generateEmpId(AdminUserRequest request) {
@@ -121,6 +165,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return String.format("EMPl%04d", count);
     }
 
+
    
     private String[] getNullPropertyNames(Object source) {
         BeanWrapper wrapper = new BeanWrapperImpl(source);
@@ -129,6 +174,95 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .filter(name -> wrapper.getPropertyValue(name) == null)
                 .toArray(String[]::new);
     }
+
+
+    @Override
+    @Transactional
+    public RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request) {
+
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
+
+        BeanUtils.copyProperties(request, employee, getNullPropertyNames(request));
+
+        if (request.getPassword() != null) {
+            employee.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        Employee saved = employeeRepository.save(employee);
+
+        return new RegisterResponse(
+                saved.getId(),
+                saved.getEmployeeId(),
+                saved.getName(),
+                saved.getEmail(),
+                saved.getRole().getName(),
+                "Employee updated successfully"
+        );
+    }
+
+  
+
+    @Override
+    @Transactional
+    public String forgotPassword(ForgotPasswordRequest request) {
+
+        Employee employee = employeeRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new EmployeeNotFoundException(
+                        "No employee found with email: " + request.getEmail()));
+
+        String otp = generateOtp();
+
+        employee.setOtp(otp);
+        employee.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
+        employeeRepository.save(employee);
+
+        emailService.sendOtpEmail(employee.getEmail(), otp);
+
+        return "OTP sent successfully to " + request.getEmail();
+    }
+
+    @Override
+    @Transactional
+    public String resetPassword(ResetPasswordRequest request) {
+
+        Employee employee = employeeRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new EmployeeNotFoundException(
+                        "No employee found with email: " + request.getEmail()));
+
+        // Check OTP exists
+        if (employee.getOtp() == null) {
+            throw new InvalidOtpException("No OTP request found. Please request a new OTP.");
+        }
+
+        // Check OTP matches
+        if (!employee.getOtp().equals(request.getOtp())) {
+            throw new InvalidOtpException("Invalid OTP");
+        }
+
+        // Check OTP hasn't expired
+        if (employee.getOtpExpiry() == null || employee.getOtpExpiry().isBefore(LocalDateTime.now())) {
+            throw new InvalidOtpException("OTP has expired. Please request a new one.");
+        }
+
+        // All checks passed — update password (encrypted)
+        employee.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // Clear OTP so it can't be reused
+        employee.setOtp(null);
+        employee.setOtpExpiry(null);
+
+        employeeRepository.save(employee);
+
+        return "Password reset successfully";
+    }
+
+    private String generateOtp() {
+        SecureRandom random = new SecureRandom();
+        int otp = 100000 + random.nextInt(900000); // always 6 digits
+        return String.valueOf(otp);
+    }
+
 
     @Override
     @Transactional
@@ -139,6 +273,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.deleteById(id);
     }
 
+ 
     @Override
     public List<EmployeeResponse> getAllEmployee() {
     	
@@ -149,27 +284,5 @@ public class EmployeeServiceImpl implements EmployeeService {
        
     }
 
-	@Override
-	 @Transactional
-	public RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request) {
-		 Employee employee = employeeRepository.findById(id)
-	                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
 
-	        BeanUtils.copyProperties(request, employee, getNullPropertyNames(request));
-
-	        if (request.getPassword() != null) {
-	            employee.setPassword(passwordEncoder.encode(request.getPassword()));
-	        }
-
-	        Employee saved = employeeRepository.save(employee);
-
-	        return new RegisterResponse(
-	                saved.getId(),
-	                saved.getEmployeeId(),
-	                saved.getName(),
-	                saved.getEmail(),
-	                saved.getRole().getName(),
-	                "Employee updated successfully"
-	        );
-	}
 }

@@ -6,6 +6,7 @@ import com.cyber_employee_portal.entity.Employee;
 import java.util.List;
 
 import com.cyber_employee_portal.dto.AdminUserRequest;
+
 import com.cyber_employee_portal.dto.AdminUserResponse;
 import com.cyber_employee_portal.dto.EmployeeResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
@@ -18,9 +19,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.nio.file.AccessDeniedException;
+import java.util.*;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
+import com.cyber_employee_portal.dto.ForgotPasswordRequest;
+import com.cyber_employee_portal.dto.ResetPasswordRequest;
+
 import org.springframework.web.bind.annotation.*;
+
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
 @RestController
@@ -38,7 +46,7 @@ public class EmployeeController {
     }
     
     @Operation(summary = "Register a new employee by Admin")
-    @PostMapping("/adminregister")
+    @PostMapping("/admin/register")
     public ResponseEntity<AdminUserResponse> adminregister(@Valid @RequestBody AdminUserRequest request) {
     	AdminUserResponse response = employeeService.generateEmpId(request);
         return ResponseEntity.ok(response);
@@ -52,11 +60,30 @@ public class EmployeeController {
     
     
     
-    @Operation(summary = "Partially update an employee (only supplied fields change)")
+    @Operation(summary = "Update an employee (only the fields you send get changed)")
     @PatchMapping("/update/{id}")
-    public ResponseEntity<?> patchUpdate(@PathVariable Long id,
-                                          @Valid @RequestBody UpdateEmployeeRequest request) {
-        return handleUpdate(id, request, true);
+    public ResponseEntity<RegisterResponse> updateEmployee(@PathVariable Long id,
+                                                            @Valid @RequestBody UpdateEmployeeRequest request) {
+        RegisterResponse response = employeeService.updateEmployee(id, request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @Operation(summary = "Request OTP for password reset")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String message = employeeService.forgotPassword(request);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Reset password using OTP")
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        String message = employeeService.resetPassword(request);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+        return ResponseEntity.ok(response);
     }
  
     @Operation(summary = "Delete an employee by id")
@@ -65,24 +92,19 @@ public class EmployeeController {
         employeeService.deleteEmployee(id);
         return ResponseEntity.noContent().build();
     }
-    
-//    @Operation(summary = "Fully replace an employee's editable fields")
-//    @PutMapping("/update/{id}")
-//    public ResponseEntity<?> putUpdate(@PathVariable Long id,
-//                                        @Valid @RequestBody UpdateEmployeeRequest request) {
-//        return handleUpdate(id, request, false);
-//    }
 
-    private ResponseEntity<?> handleUpdate(Long id, UpdateEmployeeRequest request, boolean isPartial) {
-        try {
-            RegisterResponse response = employeeService.updateEmployee( id,  request);
-            return ResponseEntity.ok(response);
-        } catch (EmployeeNotFoundException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (AccessDeniedException e) { 
-            return ResponseEntity.status(403).body(e.getMessage());
-        } catch (EmailAlreadyExistsException | IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
-    }}
+
+
+
+    @ExceptionHandler(EmployeeNotFoundException.class)
+    public ResponseEntity<String> handleNotFound(EmployeeNotFoundException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
+        return ResponseEntity.status(400).body(e.getMessage());
+    }
+
+}
 

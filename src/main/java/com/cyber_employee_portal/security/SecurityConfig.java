@@ -1,6 +1,7 @@
 package com.cyber_employee_portal.security;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -49,13 +50,17 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/api/auth/update/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/auth/update/**").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
+                
+                // --- ADDED THIS LINE TO ALLOW ACCESS TO LEAVES API ---
+                .requestMatchers("/api/leaves/**").permitAll() 
+                
                 .requestMatchers(
-                		"/v3/api-docs/**",
+                        "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html",
                         "/webjars/**",
                         "/error"
-                		).permitAll()   
+                        ).permitAll()   
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
