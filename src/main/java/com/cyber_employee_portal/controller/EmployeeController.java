@@ -9,6 +9,8 @@ import com.cyber_employee_portal.dto.AdminUserRequest;
 
 import com.cyber_employee_portal.dto.AdminUserResponse;
 import com.cyber_employee_portal.dto.EmployeeResponse;
+import com.cyber_employee_portal.dto.AnniversaryResponse;
+import com.cyber_employee_portal.dto.BirthdayResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.dto.UpdateEmployeeRequest;
@@ -19,15 +21,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import java.nio.file.AccessDeniedException;
+
+
+import java.util.List;
+import org.springframework.http.ResponseEntity;
 import java.util.*;
 
 import org.springframework.http.ResponseEntity;
 import com.cyber_employee_portal.dto.ForgotPasswordRequest;
 import com.cyber_employee_portal.dto.ResetPasswordRequest;
 
+
 import org.springframework.web.bind.annotation.*;
+import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
+import com.cyber_employee_portal.dto.EmployeeLookupResponse;
 
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
@@ -38,11 +46,17 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    @Operation(summary = "Register a new employee")
+    @Operation(summary = "Register a new employee") 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         RegisterResponse response = employeeService.register(request);
         return ResponseEntity.ok(response);
+    }
+    
+    @Operation(summary = "Look up email by Employee ID (for registration autofill)")
+    @GetMapping("/employee-lookup/{employeeId}")
+    public ResponseEntity<EmployeeLookupResponse> lookupByEmployeeId(@PathVariable String employeeId) {
+        return ResponseEntity.ok(employeeService.lookupByEmployeeId(employeeId)); 
     }
     
     @Operation(summary = "Register a new employee by Admin")
@@ -66,6 +80,7 @@ public class EmployeeController {
                                                             @Valid @RequestBody UpdateEmployeeRequest request) {
         RegisterResponse response = employeeService.updateEmployee(id, request);
         return ResponseEntity.ok(response);
+
     }
     
     @Operation(summary = "Request OTP for password reset")
@@ -84,6 +99,7 @@ public class EmployeeController {
         Map<String, String> response = new HashMap<>();
         response.put("message", message);
         return ResponseEntity.ok(response);
+
     }
  
     @Operation(summary = "Delete an employee by id")
@@ -99,6 +115,7 @@ public class EmployeeController {
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<String> handleNotFound(EmployeeNotFoundException e) {
         return ResponseEntity.status(404).body(e.getMessage());
+
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
@@ -106,5 +123,47 @@ public class EmployeeController {
         return ResponseEntity.status(400).body(e.getMessage());
     }
 
+
+
+
+
+    @GetMapping("/birthdays/today")
+    public ResponseEntity<List<BirthdayResponse>> getTodayBirthdays() {
+        return ResponseEntity.ok(employeeService.getTodayBirthdays());
+    }
+    @GetMapping("/anniversaries/today")
+    public ResponseEntity<List<AnniversaryResponse>> getTodayAnniversaries() {
+        return ResponseEntity.ok(employeeService.getTodayAnniversaries());
+    }
+    @GetMapping("/birthdays/upcoming")
+    public ResponseEntity<List<BirthdayResponse>> getUpcomingBirthdays() {
+
+        return ResponseEntity.ok(employeeService.getUpcomingBirthdays()); 
+
+    }
+    @Operation(summary = "Get Today and Upcoming Birthdays")
+    @GetMapping("/birthdays")
+    public ResponseEntity<List<BirthdayResponse>> getBirthdayList() {
+
+        return ResponseEntity.ok(employeeService.getBirthdayList());
+
+    }
+    @GetMapping("/gender/{gender}")
+    public ResponseEntity<List<RegisterResponse>> getEmployeesByGender(
+            @PathVariable String gender) {
+
+        return ResponseEntity.ok(employeeService.getEmployeesByGender(gender));
+    }
+    @GetMapping("/currentDateTime")
+    public ResponseEntity<CurrentDateTimeResponse> getCurrentDateTime() {
+        return ResponseEntity.ok(employeeService.getCurrentDateTime());
+
+    }
+
+//    @ExceptionHandler(EmailAlreadyExistsException.class)
+//    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
+//        return ResponseEntity.status(400).body(e.getMessage()); 
+//    }
+    
 }
 

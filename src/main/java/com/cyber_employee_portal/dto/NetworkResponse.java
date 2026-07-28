@@ -7,12 +7,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class RegisterResponse {
+public class NetworkResponse {
+
     private Long id;
     private String employeeId;
     private String name;
     private String email;
-    private String role;
-    private String gender;
-    private String message;
+    private String designation;
+    private String departmentName;
+    private String profileImage;
 }

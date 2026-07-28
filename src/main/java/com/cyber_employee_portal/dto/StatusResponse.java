@@ -7,12 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class RegisterResponse {
-    private Long id;
+public class StatusResponse {
+
     private String employeeId;
     private String name;
-    private String email;
-    private String role;
-    private String gender;
-    private String message;
+    private String status; // "ONLINE" or "OFFLINE"
 }

@@ -21,6 +21,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -33,6 +34,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
+
+            // Reject immediately if this token was logged out
+            if (tokenBlacklistService.isBlacklisted(jwt)) {
+                filterChain.doFilter(request, response); // stays unauthenticated, request proceeds as anonymous
+                return;
+            }
+
             try {
                 email = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {

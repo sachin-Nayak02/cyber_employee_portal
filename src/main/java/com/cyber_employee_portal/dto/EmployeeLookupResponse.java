@@ -7,12 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class RegisterResponse {
-    private Long id;
+public class EmployeeLookupResponse {
     private String employeeId;
-    private String name;
     private String email;
-    private String role;
-    private String gender;
-    private String message;
 }

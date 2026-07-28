@@ -7,9 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AdminUserResponse {
+public class LocationResponse {
 
-	    private String email;
-	    private String employeeId;
-	    private Double salary;
+    private String city;
+    private String state;
+    private String country;
 }

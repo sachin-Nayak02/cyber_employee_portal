@@ -1,27 +1,27 @@
 package com.cyber_employee_portal.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "adminUsers")
+@Table(name = "HolidayList")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class AdminUsers {
+public class HolidayList {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String email; 
+    @Column(nullable = false)
+    private String holidayName; 
     
-    @Column(unique = true, nullable = false)
-    private String employeeId;
+    @Column( nullable = false)
+    private LocalDate holidayDate ;
     
     @Column(nullable = false)
-    private Double salary;
-	
-
-	
+    private String day; 
+    
 
 }

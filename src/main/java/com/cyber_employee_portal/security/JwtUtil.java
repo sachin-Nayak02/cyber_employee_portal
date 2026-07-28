@@ -13,7 +13,7 @@ import java.util.function.Function;
 public class JwtUtil {
 
     private static final String SECRET = "ThisIsAVeryLongSecretKeyForJwtHS256MinimumThirtyTwoBytes!";
-    private static final long EXPIRATION_MS = 1000 * 60 * 60 * 10;
+    private static final long EXPIRATION_MS = 1000 * 60 * 60 * 24;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
@@ -52,5 +52,9 @@ public class JwtUtil {
 
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
+    }
+    
+    public long getExpirationMillis(String token) {
+        return extractExpiration(token).getTime();
     }
 }
