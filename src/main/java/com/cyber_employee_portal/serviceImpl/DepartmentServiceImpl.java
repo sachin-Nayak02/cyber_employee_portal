@@ -40,7 +40,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     private DepartmentResponse mapToResponse(Department department) {
         return new DepartmentResponse(department.getId(), department.getDepartmentName());
-    }
+    } 
 
     public RegisterResponse mapToEmployeeResponse(Employee employee) {
         return new RegisterResponse(
