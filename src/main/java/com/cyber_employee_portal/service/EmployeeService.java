@@ -8,8 +8,7 @@ import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.dto.AnniversaryResponse;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
-
-
+import com.cyber_employee_portal.dto.EmployeeLookupResponse;
 import com.cyber_employee_portal.dto.ForgotPasswordRequest;
 import com.cyber_employee_portal.dto.NetworkResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
@@ -35,6 +34,7 @@ public interface EmployeeService {
     RegisterResponse register(RegisterRequest request); 
 	RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request);
 	public void deleteEmployee (Long id);
+	EmployeeLookupResponse lookupByEmployeeId(String employeeId);
 
 	AdminUserResponse generateEmpId(AdminUserRequest request); 
 	List<BirthdayResponse> getTodayBirthdays(); 

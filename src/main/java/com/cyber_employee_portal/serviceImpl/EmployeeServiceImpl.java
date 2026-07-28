@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
+import com.cyber_employee_portal.dto.EmployeeLookupResponse;
 
 import java.security.SecureRandom;
 import java.text.CollationElementIterator;
@@ -66,68 +67,68 @@ public class EmployeeServiceImpl implements EmployeeService {
 	@Transactional
 	public RegisterResponse register(RegisterRequest request) {
 
-		// 1. Validate employeeId exists in AdminUsers table (pre-issued by admin)
-		AdminUsers adminUser = adminUserRepository.findByEmployeeId(request.getEmployeeId())
-				.orElseThrow(() -> new InvalidEmployeeIdException(
-						"Invalid Employee ID. This ID was not issued by admin: " + request.getEmployeeId()));
+	    // 1. Validate employeeId exists in AdminUsers table (pre-issued by admin)
+	    AdminUsers adminUser = adminUserRepository.findByEmployeeId(request.getEmployeeId())
+	            .orElseThrow(() -> new InvalidEmployeeIdException(
+	                    "Invalid Employee ID. This ID was not issued by admin: " + request.getEmployeeId()));
 
-		// 2. Prevent reusing an employeeId that's already been registered
-		if (employeeRepository.existsByEmployeeId(request.getEmployeeId())) {
-			throw new InvalidEmployeeIdException(
-					"This Employee ID has already been used to register: " + request.getEmployeeId());
-		}
+	    // 2. Prevent reusing an employeeId that's already been registered
+	    if (employeeRepository.existsByEmployeeId(request.getEmployeeId())) {
+	        throw new InvalidEmployeeIdException(
+	                "This Employee ID has already been used to register: " + request.getEmployeeId());
+	    }
 
-		// 3. Prevent duplicate email registration
-		if (employeeRepository.existsByEmail(request.getEmail())) {
-			throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
-		}
+	    // 3. Prevent duplicate email registration — check against admin-issued email, not request
+	    if (employeeRepository.existsByEmail(adminUser.getEmail())) {
+	        throw new EmailAlreadyExistsException("Email already registered: " + adminUser.getEmail());
+	    }
 
-		// 4. Resolve role — default to EMPLOYEE if not provided
-		String roleName = (request.getRoleName() == null || request.getRoleName().isBlank()) ? "EMPLOYEE"
-				: request.getRoleName().toUpperCase();
+	    // 4. Resolve role — default to EMPLOYEE if not provided
+	    String roleName = (request.getRoleName() == null || request.getRoleName().isBlank()) ? "EMPLOYEE"
+	            : request.getRoleName().toUpperCase();
+	    Role role = roleRepository.findByName(roleName)
+	            .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
 
-		Role role = roleRepository.findByName(roleName)
-				.orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
+	    Department department = departmentRepository.findByDepartmentName(request.getDepartment())
+	            .orElseThrow(() -> new IllegalArgumentException("Invalid department: " + request.getDepartment()));
 
-		Department department = departmentRepository.findByDepartmentName(request.getDepartment())
-				.orElseThrow(() -> new IllegalArgumentException("Invalid department: " + request.getDepartment()));
+	    // 5. Build employee entity — email & salary come from AdminUsers, NOT from the request
+	    Employee employee = new Employee();
+	    employee.setName(request.getName());
+	    employee.setEmail(adminUser.getEmail());              // authoritative source
+	    employee.setPassword(passwordEncoder.encode(request.getPassword()));
+	    employee.setEmployeeId(request.getEmployeeId());
+	    employee.setPhoneNumber(request.getPhoneNumber());
+	    employee.setDateOfBirth(request.getDateOfBirth());
+	    employee.setGender(request.getGender());
+	    employee.setBloodGroup(request.getBloodGroup());
+	    employee.setMaritalStatus(request.getMaritalStatus());
+	    employee.setNationality(request.getNationality());
+	    employee.setAddress(request.getAddress());
+	    employee.setCity(request.getCity());
+	    employee.setState(request.getState());
+	    employee.setCountry(request.getCountry());
+	    employee.setPincode(request.getPincode());
+	    employee.setDepartment(department);
+	    employee.setDesignation(request.getDesignation());
+	    employee.setEmploymentType(request.getEmploymentType());
+	    employee.setJoiningDate(request.getJoiningDate());
+	    employee.setSalary(adminUser.getSalary());             // authoritative source
+	    employee.setManagerId(request.getManagerId());
+	    employee.setEmergencyContactName(request.getEmergencyContactName());
+	    employee.setEmergencyContactNumber(request.getEmergencyContactNumber());
+	    employee.setProfileImage(request.getProfileImage());
+	    employee.setRole(role);
+	    employee.setActive(true);
+	    employee.setEmailVerified(false);
 
-		// 5. Build employee entity
+	    Employee saved = employeeRepository.save(employee);
 
-		Employee employee = new Employee();
-		employee.setName(request.getName());
-		employee.setEmail(request.getEmail());
-		employee.setPassword(passwordEncoder.encode(request.getPassword()));
-		employee.setEmployeeId(request.getEmployeeId());
-		employee.setPhoneNumber(request.getPhoneNumber());
-		employee.setDateOfBirth(request.getDateOfBirth());
-		employee.setGender(request.getGender());
-		employee.setBloodGroup(request.getBloodGroup());
-		employee.setMaritalStatus(request.getMaritalStatus());
-		employee.setNationality(request.getNationality());
-		employee.setAddress(request.getAddress());
-		employee.setCity(request.getCity());
-		employee.setState(request.getState());
-		employee.setCountry(request.getCountry());
-		employee.setPincode(request.getPincode());
-		employee.setDepartment(department);
-		employee.setDesignation(request.getDesignation());
-		employee.setEmploymentType(request.getEmploymentType());
-		employee.setJoiningDate(request.getJoiningDate());
-		employee.setSalary(request.getSalary());
-		employee.setManagerId(request.getManagerId());
-		employee.setEmergencyContactName(request.getEmergencyContactName());
-		employee.setEmergencyContactNumber(request.getEmergencyContactNumber());
-		employee.setProfileImage(request.getProfileImage());
-		employee.setRole(role);
-		employee.setActive(true);
-		employee.setEmailVerified(false);
-
-		Employee saved = employeeRepository.save(employee);
-
-		return new RegisterResponse(saved.getId(), saved.getEmployeeId(), saved.getName(), saved.getEmail(),
-				saved.getRole().getName(), saved.getGender(), "Employee registered successfully");
+	    return new RegisterResponse(saved.getId(), saved.getEmployeeId(), saved.getName(), saved.getEmail(),
+	            saved.getRole().getName(), saved.getGender(), "Employee registered successfully");
 	}
+	
+	
 
 	@Override
 	@Transactional
@@ -144,7 +145,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		
 		adminUsers.setEmployeeId(employeeId);
 
-		AdminUsers saved = adminUserRepository.save(adminUsers);
+		AdminUsers saved = adminUserRepository.save(adminUsers); 
 
 		return new AdminUserResponse(saved.getEmail(), saved.getEmployeeId() , saved.getSalary());
 	}
@@ -181,6 +182,21 @@ public class EmployeeServiceImpl implements EmployeeService {
 		BeanWrapper wrapper = new BeanWrapperImpl(source);
 		return Arrays.stream(wrapper.getPropertyDescriptors()).map(java.beans.PropertyDescriptor::getName)
 				.filter(name -> wrapper.getPropertyValue(name) == null).toArray(String[]::new);
+	}
+	
+	@Override
+	public EmployeeLookupResponse lookupByEmployeeId(String employeeId) {
+ 
+	    AdminUsers adminUser = adminUserRepository.findByEmployeeId(employeeId)
+	            .orElseThrow(() -> new InvalidEmployeeIdException(
+	                    "Invalid Employee ID. This ID was not issued by admin: " + employeeId));
+
+	    if (employeeRepository.existsByEmployeeId(employeeId)) {
+	        throw new InvalidEmployeeIdException(
+	                "This Employee ID has already been used to register: " + employeeId);
+	    }
+
+	    return new EmployeeLookupResponse(adminUser.getEmployeeId(), adminUser.getEmail());
 	}
 
 //    ---------------------------forgot password service logic-----------------------------------------------------

@@ -28,6 +28,7 @@ import com.cyber_employee_portal.dto.ResetPasswordRequest;
 
 import org.springframework.web.bind.annotation.*;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
+import com.cyber_employee_portal.dto.EmployeeLookupResponse;
 
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
@@ -43,6 +44,12 @@ public class EmployeeController {
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         RegisterResponse response = employeeService.register(request);
         return ResponseEntity.ok(response);
+    }
+    
+    @Operation(summary = "Look up email by Employee ID (for registration autofill)")
+    @GetMapping("/employee-lookup/{employeeId}")
+    public ResponseEntity<EmployeeLookupResponse> lookupByEmployeeId(@PathVariable String employeeId) {
+        return ResponseEntity.ok(employeeService.lookupByEmployeeId(employeeId)); 
     }
     
     @Operation(summary = "Register a new employee by Admin")
