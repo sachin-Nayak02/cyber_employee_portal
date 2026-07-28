@@ -2,13 +2,9 @@ package com.cyber_employee_portal.serviceImpl;
 
 import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
-<<<<<<< HEAD
-import com.cyber_employee_portal.dto.EmployeeResponse;
-=======
 import com.cyber_employee_portal.dto.AnniversaryResponse;
 import com.cyber_employee_portal.dto.BirthdayResponse;
 import com.cyber_employee_portal.dto.CalendarResponse;
->>>>>>> f68420b1bd18abfc65a28c3ee6f9b96adb7d855a
 import com.cyber_employee_portal.dto.RegisterRequest;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.dto.UpdateEmployeeRequest;
@@ -27,7 +23,6 @@ import com.cyber_employee_portal.service.EmployeeService;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -39,19 +34,13 @@ import com.cyber_employee_portal.dto.ResetPasswordRequest;
 import com.cyber_employee_portal.exception.InvalidOtpException;
 import com.cyber_employee_portal.service.EmailService;
 
-<<<<<<< HEAD
-
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-=======
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Collectors; 
 import java.time.LocalDateTime;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 import com.cyber_employee_portal.dto.EmployeeLookupResponse;
->>>>>>> f68420b1bd18abfc65a28c3ee6f9b96adb7d855a
+import com.cyber_employee_portal.dto.EmployeeResponse;
 
 import java.security.SecureRandom;
 import java.text.CollationElementIterator;
@@ -60,30 +49,16 @@ import java.time.LocalDateTime;
 import com.cyber_employee_portal.dto.NetworkResponse;
 import java.util.stream.Collectors;
 
-<<<<<<< HEAD
-
- 
-=======
 import java.util.Arrays;
->>>>>>> f68420b1bd18abfc65a28c3ee6f9b96adb7d855a
 
 @Service
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
-<<<<<<< HEAD
-    private final EmployeeRepository employeeRepository;
-    private final RoleRepository roleRepository;
-    private final AdminUserRepository adminUserRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final ModelMapper modelMapper;
-    
-=======
 	private final EmployeeRepository employeeRepository;
 	private final RoleRepository roleRepository;
 	private final AdminUserRepository adminUserRepository;
 	private final PasswordEncoder passwordEncoder;
->>>>>>> f68420b1bd18abfc65a28c3ee6f9b96adb7d855a
 
 	private final DepartmentRepository departmentRepository;
 
@@ -148,47 +123,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 	    employee.setActive(true);
 	    employee.setEmailVerified(false);
 
-<<<<<<< HEAD
-
-
-       
-
-        Employee employee = new Employee();
-        employee.setName(request.getName());
-        employee.setEmail(request.getEmail());
-        employee.setPassword(passwordEncoder.encode(request.getPassword()));
-        employee.setEmployeeId(request.getEmployeeId());
-        employee.setPhoneNumber(request.getPhoneNumber());
-        employee.setDateOfBirth(request.getDateOfBirth());
-        employee.setGender(request.getGender());
-        employee.setBloodGroup(request.getBloodGroup());
-        employee.setMaritalStatus(request.getMaritalStatus());
-        employee.setNationality(request.getNationality());
-        employee.setAddress(request.getAddress());
-        employee.setCity(request.getCity());
-        employee.setState(request.getState());
-        employee.setCountry(request.getCountry());
-        employee.setPincode(request.getPincode());
-        employee.setDepartment(department);
-        employee.setDesignation(request.getDesignation());
-        employee.setEmploymentType(request.getEmploymentType());
-        employee.setJoiningDate(request.getJoiningDate());
-        employee.setSalary(request.getSalary());
-        employee.setManagerId(request.getManagerId());
-        employee.setEmergencyContactName(request.getEmergencyContactName());
-        employee.setEmergencyContactNumber(request.getEmergencyContactNumber());
-        employee.setProfileImage(request.getProfileImage());
-        employee.setRole(role);
-        employee.setActive(true);
-        employee.setEmailVerified(false);
-=======
 	    Employee saved = employeeRepository.save(employee);
->>>>>>> f68420b1bd18abfc65a28c3ee6f9b96adb7d855a
 
 	    return new RegisterResponse(saved.getId(), saved.getEmployeeId(), saved.getName(), saved.getEmail(),
-	            saved.getRole().getName(), saved.getGender(), "Employee registered successfully");
+	            saved.getRole().getName(), saved.getGender(),saved.getDepartment().getDepartmentName(), "Employee registered successfully");
 	}
-	
+	 
 	
 
 	@Override
@@ -198,30 +138,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 			throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
 		}
 
-<<<<<<< HEAD
-    @Override
-    @Transactional
-    public AdminUserResponse generateEmpId(AdminUserRequest request) {
-        if (adminUserRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
-        }
-
-        String employeeId = generateEmployeeId();
-
-        AdminUsers adminUsers = new AdminUsers();
-        adminUsers.setEmail(request.getEmail());
-        adminUsers.setEmployeeId(employeeId);
-
-        AdminUsers saved = adminUserRepository.save(adminUsers);
-
-        return new AdminUserResponse(
-                saved.getEmail(),
-                saved.getEmployeeId()
-        );
-    }
-=======
 		String employeeId = generateEmployeeId();
->>>>>>> f68420b1bd18abfc65a28c3ee6f9b96adb7d855a
 
 		AdminUsers adminUsers = new AdminUsers();
 		adminUsers.setEmail(request.getEmail());
@@ -229,24 +146,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		
 		adminUsers.setEmployeeId(employeeId);
 
-<<<<<<< HEAD
-
-   
-    private String[] getNullPropertyNames(Object source) {
-        BeanWrapper wrapper = new BeanWrapperImpl(source);
-        return Arrays.stream(wrapper.getPropertyDescriptors())
-                .map(java.beans.PropertyDescriptor::getName)
-                .filter(name -> wrapper.getPropertyValue(name) == null)
-                .toArray(String[]::new);
-    }
-
-
-    @Override
-    @Transactional
-    public RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request) {
-=======
 		AdminUsers saved = adminUserRepository.save(adminUsers); 
->>>>>>> f68420b1bd18abfc65a28c3ee6f9b96adb7d855a
 
 		return new AdminUserResponse(saved.getEmail(), saved.getEmployeeId() , saved.getSalary());
 	}
@@ -274,7 +174,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		return new RegisterResponse(saved.getId(), saved.getEmployeeId(), saved.getName(), saved.getEmail(),
 				saved.getRole().getName(),
 
-				saved.getGender(),
+				saved.getGender(),  saved.getDepartment().getDepartmentName(), 
 
 				"Employee updated successfully");
 	}
@@ -300,15 +200,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	    return new EmployeeLookupResponse(adminUser.getEmployeeId(), adminUser.getEmail());
 	}
 
-<<<<<<< HEAD
-  
-
-    @Override
-    @Transactional
-    public String forgotPassword(ForgotPasswordRequest request) {
-=======
 //    ---------------------------forgot password service logic-----------------------------------------------------
->>>>>>> f68420b1bd18abfc65a28c3ee6f9b96adb7d855a
 
 	@Override
 	@Transactional
@@ -477,7 +369,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		return employees.stream()
 				.map(employee -> new RegisterResponse(employee.getId(), employee.getEmployeeId(), employee.getName(),
 						employee.getEmail(), employee.getRole() != null ? employee.getRole().getName() : "N/A",
-						employee.getGender(), "Employee fetched successfully"))
+						employee.getGender(), employee.getDepartment().getDepartmentName(), "Employee fetched successfully"))
 				.collect(Collectors.toList());
 	}
 
@@ -492,29 +384,24 @@ public class EmployeeServiceImpl implements EmployeeService {
 		return null;
 	}
 
-<<<<<<< HEAD
-
-    @Override
-    @Transactional
-    public void deleteEmployee(Long id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new EmployeeNotFoundException("Employee not found with id: " + id);
-        }
-        employeeRepository.deleteById(id);
-    }
-
- 
-    @Override
-    public List<EmployeeResponse> getAllEmployee() {
-    	
-       List<Employee> allEmployeeData=employeeRepository.findAll();
-       return allEmployeeData.stream()
-    		   .map(employee -> modelMapper.map(employee,EmployeeResponse.class))
-    		   .toList();
-       
-    }
 
 
-=======
->>>>>>> f68420b1bd18abfc65a28c3ee6f9b96adb7d855a
+	
+	    @Override
+	    public List getAllEmployee() {
+	        List<Employee> allEmployees = employeeRepository.findAll();
+	        List<Employee> result = new ArrayList<>();
+
+	        for (Employee emp : allEmployees) {
+	            result.add(emp);
+	        }
+
+	        return result;
+	    
+
+	
+
+		
+	}
+
 }
