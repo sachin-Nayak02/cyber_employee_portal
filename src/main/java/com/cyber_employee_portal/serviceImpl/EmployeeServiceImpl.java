@@ -35,20 +35,14 @@ import com.cyber_employee_portal.exception.InvalidOtpException;
 import com.cyber_employee_portal.service.EmailService;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 import com.cyber_employee_portal.dto.EmployeeLookupResponse;
 
 import java.security.SecureRandom;
-import java.text.CollationElementIterator;
-import java.time.LocalDateTime;
 
 import com.cyber_employee_portal.dto.NetworkResponse;
-import java.util.stream.Collectors;
-
-import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -142,12 +136,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 		AdminUsers adminUsers = new AdminUsers();
 		adminUsers.setEmail(request.getEmail());
 		adminUsers.setSalary(request.getSalary());
-		
+
 		adminUsers.setEmployeeId(employeeId);
 
 		AdminUsers saved = adminUserRepository.save(adminUsers); 
 
-		return new AdminUserResponse(saved.getEmail(), saved.getEmployeeId() , saved.getSalary());
+		return new AdminUserResponse(saved.getEmail(), saved.getEmployeeId(), saved.getSalary());
 	}
 
 	private String generateEmployeeId() {
@@ -162,7 +156,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 		Employee employee = employeeRepository.findById(id)
 				.orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
 
-		BeanUtils.copyProperties(request, employee, getNullPropertyNames(request));
+		
+		String[] ignoredProperties = appendIgnoredProperty(getNullPropertyNames(request), "department");
+		BeanUtils.copyProperties(request, employee, ignoredProperties);
+
+		if (request.getDepartment() != null && !request.getDepartment().isBlank()) {
+			Department department = departmentRepository.findByDepartmentName(request.getDepartment())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid department: " + request.getDepartment()));
+			employee.setDepartment(department);
+		}
 
 		if (request.getPassword() != null) {
 			employee.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -197,6 +199,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 	    }
 
 	    return new EmployeeLookupResponse(adminUser.getEmployeeId(), adminUser.getEmail());
+	}
+
+	private String[] appendIgnoredProperty(String[] existing, String propertyToIgnore) {
+		String[] result = Arrays.copyOf(existing, existing.length + 1);
+		result[existing.length] = propertyToIgnore;
+		return result;
 	}
 
 //    ---------------------------forgot password service logic-----------------------------------------------------
@@ -324,11 +332,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public List<AnniversaryResponse> getTodayAnniversaries() {
 		return employeeRepository.findTodayAnniversaries().stream()
 				.map(e -> new AnniversaryResponse(e.getId(), e.getName(), e.getEmployeeId(),
-						(e.getDepartment() != null) ? e.getDepartment().getDepartmentName() : "Not Assigned",e.getDesignation(), e.getJoiningDate()))
+						(e.getDepartment() != null) ? e.getDepartment().getDepartmentName() : "Not Assigned", e.getDesignation(), e.getJoiningDate()))
 				.collect(Collectors.toList());
 
 	}
- 
+
 	@Override
 	public List<BirthdayResponse> getUpcomingBirthdays() {
 
