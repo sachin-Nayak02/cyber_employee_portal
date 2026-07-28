@@ -33,5 +33,12 @@ public class HolidayListController {
 
         return ResponseEntity.ok(holidayListService.getAllHolidays());
     }
+    @Operation(summary = "Get Upcoming Holidays")
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<HolidayList>> getUpcomingHolidays() {
+
+        return ResponseEntity.ok(holidayListService.getUpcomingHolidays());
+
+    }
 
 }

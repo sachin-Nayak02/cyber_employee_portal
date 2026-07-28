@@ -140,11 +140,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 		AdminUsers adminUsers = new AdminUsers();
 		adminUsers.setEmail(request.getEmail());
+		adminUsers.setSalary(request.getSalary());
+		
 		adminUsers.setEmployeeId(employeeId);
 
 		AdminUsers saved = adminUserRepository.save(adminUsers);
 
-		return new AdminUserResponse(saved.getEmail(), saved.getEmployeeId());
+		return new AdminUserResponse(saved.getEmail(), saved.getEmployeeId() , saved.getSalary());
 	}
 
 	private String generateEmployeeId() {

@@ -8,5 +8,6 @@ public interface HolidayListService {
     HolidayList saveHoliday(HolidayList holiday);
 
     List<HolidayList> getAllHolidays();
+    List<HolidayList> getUpcomingHolidays();
 
 }
