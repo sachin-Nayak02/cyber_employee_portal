@@ -384,6 +384,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public CurrentDateTimeResponse getCurrentDateTime() {
 		return new CurrentDateTimeResponse(LocalDateTime.now());
 	}
+	@Override
+	public List<AnniversaryResponse> getUpcomingAnniversaries() {
+	    return employeeRepository.findUpcomingAnniversaries().stream()
+	            .map(e -> new AnniversaryResponse(e.getId(), e.getName(), e.getEmployeeId(),
+	                    (e.getDepartment() != null) ? e.getDepartment().getDepartmentName() : "Not Assigned",
+	                    e.getDesignation(), e.getJoiningDate()))
+	            .collect(Collectors.toList());
+	}
 
 	@Override
 	public List<CalendarResponse> getCalendarEvents() {

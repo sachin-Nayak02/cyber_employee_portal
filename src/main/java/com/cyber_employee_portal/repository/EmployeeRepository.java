@@ -44,5 +44,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByDepartment_Id(Long departmentId);
     
     List<Employee> findByDepartment_IdAndNameContainingIgnoreCase(Long departmentId, String name);
+    @Query("""
+            SELECT e FROM Employee e
+            WHERE
+            (MONTH(e.joiningDate) > MONTH(CURRENT_DATE))
+            OR
+            (MONTH(e.joiningDate) = MONTH(CURRENT_DATE)
+            AND DAY(e.joiningDate) > DAY(CURRENT_DATE))
+            ORDER BY MONTH(e.joiningDate), DAY(e.joiningDate)
+            """)
+    List<Employee> findUpcomingAnniversaries();
 }
 

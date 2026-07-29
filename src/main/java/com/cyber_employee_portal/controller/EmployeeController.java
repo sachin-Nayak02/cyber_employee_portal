@@ -23,11 +23,15 @@ import java.util.*;
 
 import org.springframework.http.ResponseEntity;
 import com.cyber_employee_portal.dto.ForgotPasswordRequest;
+import com.cyber_employee_portal.dto.HolidayDTO;
+import com.cyber_employee_portal.dto.NetworkResponse;
+import com.cyber_employee_portal.dto.ProjectResponse;
 import com.cyber_employee_portal.dto.ResetPasswordRequest;
 
 
 import org.springframework.web.bind.annotation.*;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
+import com.cyber_employee_portal.dto.EmployeeInfoResponse;
 import com.cyber_employee_portal.dto.EmployeeLookupResponse;
 
 
@@ -137,6 +141,16 @@ public class EmployeeController {
 
     }
 
+    public class DashboardResponse {
+        private EmployeeInfoResponse employeeInfo;
+        private ProjectResponse assignedProject;
+        private List<NetworkResponse> teamMembers;
+        private List<HolidayDTO> holidays;
+        private List<BirthdayResponse> todayBirthdays;
+        private List<BirthdayResponse> upcomingBirthdays;
+        private List<AnniversaryResponse> todayAnniversaries;
+        private List<AnniversaryResponse> upcomingAnniversaries;
+    }
 //    @ExceptionHandler(EmailAlreadyExistsException.class)
 //    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
 //        return ResponseEntity.status(400).body(e.getMessage()); 

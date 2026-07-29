@@ -53,5 +53,6 @@ public interface EmployeeService {
    
     List<NetworkResponse> getMyNetwork(String email);
     List<NetworkResponse> findPeopleByName(String email, String name);
+    List<AnniversaryResponse> getUpcomingAnniversaries();
 
 }
