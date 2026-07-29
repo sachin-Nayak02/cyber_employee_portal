@@ -14,3 +14,4 @@ public interface AdminUserRepository extends JpaRepository<AdminUsers,Long >{
 	 Optional<AdminUsers> findByEmployeeId(String employeeId);
  
 }
+

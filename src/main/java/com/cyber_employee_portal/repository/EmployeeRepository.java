@@ -10,10 +10,11 @@ import com.cyber_employee_portal.entity.Department;
 import com.cyber_employee_portal.entity.Employee;
 import java.util.List;
 
-@Repository 
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
-	Optional<Employee> findByEmail(String email);
+
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+    Optional<Employee> findByEmail(String email);
 
 
 //    @Query("SELECT e.id FROM Employee e WHERE e.email = :email")
@@ -40,6 +41,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     Optional<Employee> findByEmployeeId(String employeeId);
     boolean existsByEmail(String email);
+
+
+
     boolean existsByEmployeeId(String employeeId);
     List<Employee> findByDepartment_Id(Long departmentId);
     
@@ -55,4 +59,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             """)
     List<Employee> findUpcomingAnniversaries();
 }
+
 

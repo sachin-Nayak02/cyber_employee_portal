@@ -52,24 +52,32 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
         	.cors(cors -> cors.configurationSource(corsConfigurationSource()))
         	.csrf(csrf -> csrf.disable())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+
                 .requestMatchers(HttpMethod.PATCH, "/api/auth/update/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/auth/update/**").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
+                
+                // --- ADDED THIS LINE TO ALLOW ACCESS TO LEAVES API ---
+                .requestMatchers("/api/leaves/**").permitAll() 
+                
                 .requestMatchers(
-                		"/v3/api-docs/**",
+                        "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html",
                         "/webjars/**",
                         "/error"
-                		).permitAll()   
+                        ).permitAll()   
                 .anyRequest().authenticated()
             )
+
+            	    
+
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())

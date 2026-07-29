@@ -1,7 +1,9 @@
 package com.cyber_employee_portal.service;
 
+
 import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
+import com.cyber_employee_portal.dto.EmployeeResponse;
 import com.cyber_employee_portal.dto.BirthdayResponse;
 import com.cyber_employee_portal.dto.CalendarResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
@@ -19,6 +21,7 @@ import com.cyber_employee_portal.entity.Employee;
 
 import jakarta.validation.Valid;
 
+
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
@@ -26,11 +29,14 @@ import org.jspecify.annotations.Nullable;
 
 
 public interface EmployeeService {
+
+
+
+    List<EmployeeResponse> getAllEmployee(); 
+
+
 	 
-//	Employee postEmployee(Employee employee);
-//    List<Employee> getAllEmployee(); 
-//    void deleteEmployee(Long id); 
-//    Employee updateEmployee(Long id, Employee employee); 
+ 
     RegisterResponse register(RegisterRequest request); 
 	RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request);
 	public void deleteEmployee (Long id);
@@ -49,10 +55,11 @@ public interface EmployeeService {
 	 
 
 	String forgotPassword(ForgotPasswordRequest request);
-    String resetPassword(ResetPasswordRequest request);
+    String resetPassword(ResetPasswordRequest request); 
    
     List<NetworkResponse> getMyNetwork(String email);
     List<NetworkResponse> findPeopleByName(String email, String name);
     List<AnniversaryResponse> getUpcomingAnniversaries();
 
 }
+

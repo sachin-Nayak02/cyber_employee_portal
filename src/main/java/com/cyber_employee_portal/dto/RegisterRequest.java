@@ -60,17 +60,10 @@ public class RegisterRequest {
 
 
     
-    //----------------
-
-    // If not provided, defaults to "EMPLOYEE" in the service layer
+  
     private String roleName;
 
 
-
-//	public String getEmployeeId() { 
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
 
 
 
