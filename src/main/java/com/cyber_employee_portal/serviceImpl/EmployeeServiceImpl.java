@@ -125,9 +125,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 	    Employee saved = employeeRepository.save(employee);
 
 	    return new RegisterResponse(saved.getId(), saved.getEmployeeId(), saved.getName(), saved.getEmail(),
-	            saved.getRole().getName(), saved.getGender(), "Employee registered successfully");
+	            saved.getRole().getName(), saved.getGender(),saved.getDepartment().getDepartmentName(), "Employee registered successfully");
 	}
-	
+	 
 	
 
 	@Override
@@ -173,7 +173,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		return new RegisterResponse(saved.getId(), saved.getEmployeeId(), saved.getName(), saved.getEmail(),
 				saved.getRole().getName(),
 
-				saved.getGender(),
+				saved.getGender(),  saved.getDepartment().getDepartmentName(), 
 
 				"Employee updated successfully");
 	}
@@ -368,7 +368,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		return employees.stream()
 				.map(employee -> new RegisterResponse(employee.getId(), employee.getEmployeeId(), employee.getName(),
 						employee.getEmail(), employee.getRole() != null ? employee.getRole().getName() : "N/A",
-						employee.getGender(), "Employee fetched successfully"))
+						employee.getGender(), employee.getDepartment().getDepartmentName(), "Employee fetched successfully"))
 				.collect(Collectors.toList());
 	}
 

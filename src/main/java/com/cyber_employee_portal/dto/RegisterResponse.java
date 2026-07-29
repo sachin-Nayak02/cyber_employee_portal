@@ -15,4 +15,5 @@ public class RegisterResponse {
     private String role;
     private String gender;
     private String message;
+    private String department;
 }

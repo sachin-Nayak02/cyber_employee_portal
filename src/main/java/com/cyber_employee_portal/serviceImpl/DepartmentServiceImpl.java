@@ -50,6 +50,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 employee.getEmail(),
                 employee.getGender(),
                 employee.getRole().getName(), 
+                employee.getDepartment().getDepartmentName(),
                 null
         );
     }
