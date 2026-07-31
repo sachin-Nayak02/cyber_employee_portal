@@ -1,10 +1,11 @@
 package com.cyber_employee_portal.controller;
+
 import com.cyber_employee_portal.entity.Employee;
 import java.util.List;
 
+
 import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
-import com.cyber_employee_portal.dto.EmployeeResponse;
 import com.cyber_employee_portal.dto.AnniversaryResponse;
 import com.cyber_employee_portal.dto.BirthdayResponse;
 import com.cyber_employee_portal.dto.RegisterRequest;
@@ -17,7 +18,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import java.nio.file.AccessDeniedException;
 
 
 import java.util.List;
@@ -32,6 +32,7 @@ import com.cyber_employee_portal.dto.ResetPasswordRequest;
 import org.springframework.web.bind.annotation.*;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 import com.cyber_employee_portal.dto.EmployeeLookupResponse;
+import com.cyber_employee_portal.dto.EmployeeResponse;
 
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
@@ -61,6 +62,7 @@ public class EmployeeController {
     	AdminUserResponse response = employeeService.generateEmpId(request);
         return ResponseEntity.ok(response);
     }
+
     
     @Operation(summary = "Get history of all Employee IDs issued by admin")
     @GetMapping("/admin/all")
@@ -74,7 +76,6 @@ public class EmployeeController {
         List<EmployeeResponse> employees = employeeService.getAllEmployee();
         return ResponseEntity.ok(employees);
     }
-    
     
     
     @Operation(summary = "Update an employee (only the fields you send get changed)")
@@ -112,9 +113,6 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
-
-
-
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<String> handleNotFound(EmployeeNotFoundException e) {
         return ResponseEntity.status(404).body(e.getMessage());
@@ -125,11 +123,6 @@ public class EmployeeController {
     public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
         return ResponseEntity.status(400).body(e.getMessage());
     }
-
-
-
-
-
     @GetMapping("/birthdays/today")
     public ResponseEntity<List<BirthdayResponse>> getTodayBirthdays() {
         return ResponseEntity.ok(employeeService.getTodayBirthdays());
@@ -163,10 +156,13 @@ public class EmployeeController {
 
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<RegisterResponse> getEmployeeById(@PathVariable Long id) {
+        return ResponseEntity.ok(employeeService.getEmployeeById(id));
+    }
 //    @ExceptionHandler(EmailAlreadyExistsException.class)
 //    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
 //        return ResponseEntity.status(400).body(e.getMessage()); 
 //    }
     
 }
-

@@ -20,7 +20,7 @@ import com.cyber_employee_portal.repository.DepartmentRepository;
 import com.cyber_employee_portal.repository.EmployeeRepository;
 import com.cyber_employee_portal.repository.RoleRepository; 
 import com.cyber_employee_portal.service.EmployeeService;
-import java.util.List;
+import java.util.*;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -389,6 +389,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public CurrentDateTimeResponse getCurrentDateTime() {
 		return new CurrentDateTimeResponse(LocalDateTime.now());
 	}
+	@Override
+	public List<AnniversaryResponse> getUpcomingAnniversaries() {
+	    return employeeRepository.findUpcomingAnniversaries().stream()
+	            .map(e -> new AnniversaryResponse(e.getId(), e.getName(), e.getEmployeeId(),
+	                    (e.getDepartment() != null) ? e.getDepartment().getDepartmentName() : "Not Assigned",
+	                    e.getDesignation(), e.getJoiningDate()))
+	            .collect(Collectors.toList());
+	}
 
 	@Override
 	public List<CalendarResponse> getCalendarEvents() {
@@ -398,12 +406,44 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
 
+
 	@Override
 	public List<EmployeeResponse> getAllEmployee() {
 	    return employeeRepository.findAll().stream()
 	            .map(this::mapToEmployeeResponse)
 	            .collect(Collectors.toList());
 	}
+
+	
+//	    @Override
+//	    public List getAllEmployee() {
+//	        List<Employee> allEmployees = employeeRepository.findAll();
+//	        List<Employee> result = new ArrayList<>();
+//
+//	        for (Employee emp : allEmployees) {
+//	            result.add(emp);
+//	        }
+//
+//	        return result;
+//	    } 
+	    
+	    @Override
+	    public RegisterResponse getEmployeeById(Long id) {
+	        Employee employee = employeeRepository.findById(id)
+	                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
+
+	        return new RegisterResponse(
+	                employee.getId(),
+	                employee.getEmployeeId(),
+	                employee.getName(),
+	                employee.getEmail(),
+	                employee.getRole() != null ? employee.getRole().getName() : "N/A",
+	                employee.getGender(),
+	                employee.getDepartment() != null ? employee.getDepartment().getDepartmentName() : "Not Assigned",
+	                "Employee fetched successfully"
+	        );
+	    }
+
 
 	private EmployeeResponse mapToEmployeeResponse(Employee employee) {
 	    return new EmployeeResponse(

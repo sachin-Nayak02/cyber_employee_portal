@@ -1,6 +1,7 @@
 package com.cyber_employee_portal.serviceImpl;
 
 import com.cyber_employee_portal.dto.LeaveRequest;
+import com.cyber_employee_portal.dto.LeaveResponse;
 import com.cyber_employee_portal.entity.Employee;
 import com.cyber_employee_portal.entity.Leave;
 import com.cyber_employee_portal.exception.EmployeeNotFoundException;
@@ -10,8 +11,10 @@ import com.cyber_employee_portal.service.LeaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LeaveServiceImpl implements LeaveService {
@@ -62,4 +65,29 @@ public class LeaveServiceImpl implements LeaveService {
         leave.setStatus(status.toUpperCase());
         return leaveRepository.save(leave);
     }
-}
+    
+    @Override
+    public List<LeaveResponse> getActiveLeaves(LocalDate today) {
+        return leaveRepository.findByStartDateLessThanEqualAndEndDateGreaterThanEqual(today, today)
+                .stream()
+                .map(this::mapToLeaveResponse)
+                .collect(Collectors.toList()); 
+    }
+
+    private LeaveResponse mapToLeaveResponse(Leave leave) {
+        return new LeaveResponse(
+                leave.getId(),
+                leave.getEmployee().getName(),
+                leave.getEmployee().getEmployeeId(),
+                (leave.getEmployee().getDepartment() != null) ? leave.getEmployee().getDepartment().getDepartmentName() : "Unassigned",
+                leave.getEmployee().getDesignation(),
+                leave.getLeaveType(),
+                leave.getStartDate(),
+                leave.getEndDate(),
+                leave.getDays(),
+                leave.getReason(),
+                leave.getStatus()
+        );
+    }
+     
+	}

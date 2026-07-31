@@ -1,6 +1,7 @@
 package com.cyber_employee_portal.controller;
 
 import com.cyber_employee_portal.dto.LeaveRequest;
+import com.cyber_employee_portal.dto.LeaveResponse;
 import com.cyber_employee_portal.dto.LeaveStatusUpdate;
 import com.cyber_employee_portal.entity.Leave;
 import com.cyber_employee_portal.service.LeaveService;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -53,4 +55,16 @@ public class LeaveController {
         Leave updatedLeave = leaveService.updateLeaveStatus(leaveId, updateRequest.getStatus());
         return ResponseEntity.ok(updatedLeave);
     }
+
+    // ==========================================
+    // PROFILE DISPLAY API
+    // ==========================================
+
+    // API to get active leaves to display on profiles
+    @GetMapping("/today")
+    public ResponseEntity<List<LeaveResponse>> getActiveLeaves() {
+        LocalDate today = LocalDate.now();
+        List<LeaveResponse> activeLeaves = leaveService.getActiveLeaves(today);
+        return ResponseEntity.ok(activeLeaves);
+    } 
 }
