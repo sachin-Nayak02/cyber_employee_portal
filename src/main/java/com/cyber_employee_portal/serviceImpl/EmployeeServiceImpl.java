@@ -405,11 +405,23 @@ public class EmployeeServiceImpl implements EmployeeService {
 	        }
 
 	        return result;
+	    }
 	    
+	    @Override
+	    public RegisterResponse getEmployeeById(Long id) {
+	        Employee employee = employeeRepository.findById(id)
+	                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
 
-	
-
-		
-	}
+	        return new RegisterResponse(
+	                employee.getId(),
+	                employee.getEmployeeId(),
+	                employee.getName(),
+	                employee.getEmail(),
+	                employee.getRole() != null ? employee.getRole().getName() : "N/A",
+	                employee.getGender(),
+	                employee.getDepartment() != null ? employee.getDepartment().getDepartmentName() : "Not Assigned",
+	                "Employee fetched successfully"
+	        );
+	    }
 
 }
