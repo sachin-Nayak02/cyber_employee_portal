@@ -18,7 +18,7 @@ import com.cyber_employee_portal.exception.InvalidEmployeeIdException;
 import com.cyber_employee_portal.repository.AdminUserRepository;
 import com.cyber_employee_portal.repository.DepartmentRepository;
 import com.cyber_employee_portal.repository.EmployeeRepository;
-import com.cyber_employee_portal.repository.RoleRepository;
+import com.cyber_employee_portal.repository.RoleRepository; 
 import com.cyber_employee_portal.service.EmployeeService;
 import java.util.List;
 
@@ -34,9 +34,9 @@ import com.cyber_employee_portal.dto.ResetPasswordRequest;
 import com.cyber_employee_portal.exception.InvalidOtpException;
 import com.cyber_employee_portal.service.EmailService;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors; 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 import com.cyber_employee_portal.dto.EmployeeLookupResponse;
@@ -56,7 +56,7 @@ import java.util.Arrays;
 public class EmployeeServiceImpl implements EmployeeService {
 
 	private final EmployeeRepository employeeRepository;
-	private final RoleRepository roleRepository;
+	private final RoleRepository roleRepository; 
 	private final AdminUserRepository adminUserRepository;
 	private final PasswordEncoder passwordEncoder;
 
@@ -148,14 +148,26 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 		AdminUsers saved = adminUserRepository.save(adminUsers); 
 
-		return new AdminUserResponse(saved.getEmail(), saved.getEmployeeId() , saved.getSalary());
+		return new AdminUserResponse( saved.getId(), saved.getEmail(), saved.getEmployeeId() , saved.getSalary() );
 	}
 
 	private String generateEmployeeId() {
 		long count = adminUserRepository.count() + 1;
 		return String.format("EMPl%04d", count);
 	}
-
+	
+	@Override
+	public List<AdminUserResponse> getAllAdminUsers() {
+	    return adminUserRepository.findAll().stream()
+	            .map(admin -> new AdminUserResponse(
+	                    admin.getId(),
+	                    admin.getEmployeeId(),
+	                    admin.getEmail(),
+	                    admin.getSalary()
+	            ))
+	            .collect(Collectors.toList());
+	}
+	
 	@Override
 	@Transactional
 	public RegisterResponse updateEmployee(Long id, UpdateEmployeeRequest request) {
@@ -386,22 +398,44 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
 
-	
-	    @Override
-	    public List getAllEmployee() {
-	        List<Employee> allEmployees = employeeRepository.findAll();
-	        List<Employee> result = new ArrayList<>();
-
-	        for (Employee emp : allEmployees) {
-	            result.add(emp);
-	        }
-
-	        return result;
-	    
-
-	
-
-		
+	@Override
+	public List<EmployeeResponse> getAllEmployee() {
+	    return employeeRepository.findAll().stream()
+	            .map(this::mapToEmployeeResponse)
+	            .collect(Collectors.toList());
 	}
 
+	private EmployeeResponse mapToEmployeeResponse(Employee employee) {
+	    return new EmployeeResponse(
+	            employee.getId(),
+	            employee.getEmployeeId(), 
+	            employee.getName(),
+	            employee.getEmail(),
+	            employee.getPhoneNumber(),
+	            employee.getDateOfBirth(),
+	            employee.getGender(),
+	            employee.getBloodGroup(),
+	            employee.getMaritalStatus(),
+	            employee.getNationality(),
+	            employee.getAddress(),
+	            employee.getCity(),
+	            employee.getState(),
+	            employee.getCountry(),
+	            employee.getPincode(),
+	            (employee.getDepartment() != null) ? employee.getDepartment().getDepartmentName() : null,
+	            employee.getDesignation(),
+	            employee.getEmploymentType(),
+	            employee.getJoiningDate(),
+	            employee.getSalary(),
+	            employee.getManagerId(),
+	            employee.getEmergencyContactName(),
+	            employee.getEmergencyContactNumber(),
+	            employee.getProfileImage(),
+	            (employee.getRole() != null) ? employee.getRole().getName() : null,
+	            employee.getActive() != null && employee.getActive(),
+	            employee.getEmailVerified() != null && employee.getEmailVerified()
+	    );
+
+}
+	
 }

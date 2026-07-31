@@ -8,7 +8,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class AdminUserResponse {
-
+		
+    	private Long id;
 	    private String email;
 	    private String employeeId;
 	    private Double salary;

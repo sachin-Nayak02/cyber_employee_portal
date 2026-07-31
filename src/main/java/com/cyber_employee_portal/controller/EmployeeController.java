@@ -2,11 +2,7 @@ package com.cyber_employee_portal.controller;
 import com.cyber_employee_portal.entity.Employee;
 import java.util.List;
 
-import com.cyber_employee_portal.entity.Employee;
-import java.util.List;
-
 import com.cyber_employee_portal.dto.AdminUserRequest;
-
 import com.cyber_employee_portal.dto.AdminUserResponse;
 import com.cyber_employee_portal.dto.EmployeeResponse;
 import com.cyber_employee_portal.dto.AnniversaryResponse;
@@ -65,6 +61,13 @@ public class EmployeeController {
     	AdminUserResponse response = employeeService.generateEmpId(request);
         return ResponseEntity.ok(response);
     }
+    
+    @Operation(summary = "Get history of all Employee IDs issued by admin")
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<AdminUserResponse>> getAllAdminUsers() {
+        return ResponseEntity.ok(employeeService.getAllAdminUsers());
+    }
+    
     @Operation(summary = "Get all employees")
     @GetMapping("/all")
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
