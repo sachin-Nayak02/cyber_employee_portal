@@ -1,7 +1,10 @@
 package com.cyber_employee_portal.service;
 
 import com.cyber_employee_portal.dto.LeaveRequest;
+import com.cyber_employee_portal.dto.LeaveResponse;
 import com.cyber_employee_portal.entity.Leave;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface LeaveService {
@@ -9,4 +12,5 @@ public interface LeaveService {
     List<Leave> getPendingLeaves();
     List<Leave> getEmployeeLeaves(Long employeeId);
     Leave updateLeaveStatus(Long leaveId, String status);
+    List<LeaveResponse> getActiveLeaves(LocalDate today);
 }

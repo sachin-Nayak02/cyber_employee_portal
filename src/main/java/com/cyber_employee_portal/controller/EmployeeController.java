@@ -1,7 +1,10 @@
 package com.cyber_employee_portal.controller;
 
-import com.cyber_employee_portal.dto.AdminUserRequest;
+import com.cyber_employee_portal.entity.Employee;
+import java.util.List;
 
+
+import com.cyber_employee_portal.dto.AdminUserRequest;
 import com.cyber_employee_portal.dto.AdminUserResponse;
 import com.cyber_employee_portal.dto.AnniversaryResponse;
 import com.cyber_employee_portal.dto.BirthdayResponse;
@@ -29,6 +32,7 @@ import com.cyber_employee_portal.dto.ResetPasswordRequest;
 import org.springframework.web.bind.annotation.*;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 import com.cyber_employee_portal.dto.EmployeeLookupResponse;
+import com.cyber_employee_portal.dto.EmployeeResponse;
 
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
@@ -58,6 +62,21 @@ public class EmployeeController {
     	AdminUserResponse response = employeeService.generateEmpId(request);
         return ResponseEntity.ok(response);
     }
+
+    
+    @Operation(summary = "Get history of all Employee IDs issued by admin")
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<AdminUserResponse>> getAllAdminUsers() {
+        return ResponseEntity.ok(employeeService.getAllAdminUsers());
+    }
+    
+    @Operation(summary = "Get all employees")
+    @GetMapping("/all")
+    public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
+        List<EmployeeResponse> employees = employeeService.getAllEmployee();
+        return ResponseEntity.ok(employees);
+    }
+    
     
     @Operation(summary = "Update an employee (only the fields you send get changed)")
     @PatchMapping("/update/{id}")

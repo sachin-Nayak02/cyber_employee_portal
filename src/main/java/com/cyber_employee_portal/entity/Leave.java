@@ -4,9 +4,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
 
-@Data
+
 @Entity
 @Table(name = "leaves")
+@Data
 public class Leave {
     
     @Id
@@ -37,5 +38,7 @@ public class Leave {
 
     // Status can be: PENDING, APPROVED, REJECTED
     @Column(nullable = false)
-    private String status = "PENDING"; 
+    private String status = "PENDING";
+
+	
 }

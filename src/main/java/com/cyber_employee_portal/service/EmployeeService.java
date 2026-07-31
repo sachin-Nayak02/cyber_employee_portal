@@ -43,6 +43,7 @@ public interface EmployeeService {
 	EmployeeLookupResponse lookupByEmployeeId(String employeeId);
 
 	AdminUserResponse generateEmpId(AdminUserRequest request); 
+	List<AdminUserResponse> getAllAdminUsers();
 	List<BirthdayResponse> getTodayBirthdays(); 
 	 List<AnniversaryResponse> getTodayAnniversaries();
 	 List<BirthdayResponse> getUpcomingBirthdays();
