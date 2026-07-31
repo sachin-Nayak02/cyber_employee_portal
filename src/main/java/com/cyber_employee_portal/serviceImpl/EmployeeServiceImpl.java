@@ -34,12 +34,13 @@ import com.cyber_employee_portal.dto.ResetPasswordRequest;
 import com.cyber_employee_portal.exception.InvalidOtpException;
 import com.cyber_employee_portal.service.EmailService;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Collectors; 
 import java.time.LocalDateTime;
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 import com.cyber_employee_portal.dto.EmployeeLookupResponse;
+import com.cyber_employee_portal.dto.EmployeeResponse;
 
 import java.security.SecureRandom;
 import java.text.CollationElementIterator;
@@ -381,6 +382,26 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public List<CalendarResponse> getCalendarEvents() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+
+	
+	    @Override
+	    public List getAllEmployee() {
+	        List<Employee> allEmployees = employeeRepository.findAll();
+	        List<Employee> result = new ArrayList<>();
+
+	        for (Employee emp : allEmployees) {
+	            result.add(emp);
+	        }
+
+	        return result;
+	    
+
+	
+
+		
 	}
 
 }
