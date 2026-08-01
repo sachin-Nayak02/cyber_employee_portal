@@ -30,9 +30,18 @@ import com.cyber_employee_portal.dto.ResetPasswordRequest;
 
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
 import com.cyber_employee_portal.dto.EmployeeLookupResponse;
 import com.cyber_employee_portal.dto.EmployeeResponse;
+
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource ;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Tag(name = "Employee", description = "Employee registration and management endpoints")
@@ -63,6 +72,28 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
+    
+    @Operation(summary = "Upload or replace the logged-in employee's profile image")
+    @PostMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadProfileImage(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal Employee employee) {
+
+        String fileName = employeeService.uploadProfileImage(file, employee);
+        Map<String, String> response = new HashMap<>();
+        response.put("profileImage", fileName);
+        response.put("message", "Profile image uploaded successfully");
+        return ResponseEntity.ok(response);
+    } 
+
+    @Operation(summary = "Get an employee's profile image by employee database ID")
+    @GetMapping("/profile-image/{employeeId}")
+    public ResponseEntity<Resource> getProfileImage(@PathVariable Long employeeId) {
+        Resource resource = employeeService.getProfileImage(employeeId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG) // browsers render JPEG/PNG fine either way via this header in practice
+                .body(resource);
+    }
     
     @Operation(summary = "Get history of all Employee IDs issued by admin")
     @GetMapping("/admin/all")

@@ -50,6 +50,20 @@ import com.cyber_employee_portal.dto.NetworkResponse;
 import java.util.stream.Collectors;
 
 import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -127,6 +141,76 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	    return new RegisterResponse(saved.getId(), saved.getEmployeeId(), saved.getName(), saved.getEmail(),
 	            saved.getRole().getName(), saved.getGender(),saved.getDepartment().getDepartmentName(), "Employee registered successfully");
+	}
+	
+	@Value("${app.upload.profile-dir}")
+	private String profileUploadDir;
+
+	@Override
+	@Transactional
+	public String uploadProfileImage(MultipartFile file, Employee employee) {
+
+	    if (file.isEmpty()) {
+	        throw new IllegalArgumentException("Uploaded file is empty");
+	    }
+
+	    String contentType = file.getContentType();
+	    if (contentType == null || !contentType.startsWith("image/")) {
+	        throw new IllegalArgumentException("Only image files are allowed");
+	    }
+
+	    String originalFileName = file.getOriginalFilename();
+	    String extension = (originalFileName != null && originalFileName.contains("."))
+	            ? originalFileName.substring(originalFileName.lastIndexOf(".") + 1)
+	            : "jpg";
+
+	    String storedFileName = "emp_" + employee.getId() + "_" + UUID.randomUUID() + "." + extension;
+
+	    try {
+	        Path dir = Paths.get(profileUploadDir);
+	        Files.createDirectories(dir);
+
+	        // Delete old profile image file if one exists, to avoid orphaned files piling up
+	        if (employee.getProfileImage() != null) {
+	            Path oldFile = Paths.get(profileUploadDir, employee.getProfileImage());
+	            Files.deleteIfExists(oldFile);
+	        }
+
+	        Path targetPath = dir.resolve(storedFileName);
+	        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+	        employee.setProfileImage(storedFileName);
+	        employeeRepository.save(employee);
+
+	        return storedFileName;
+
+	    } catch (IOException e) {
+	        throw new RuntimeException("Failed to store profile image: " + e.getMessage());
+	    }
+	}
+
+	@Override
+	public Resource getProfileImage(Long employeeId) {
+
+	    Employee employee = employeeRepository.findById(employeeId)
+	            .orElseThrow(() -> new EmployeeNotFoundException("Employee not found: " + employeeId));
+
+	    if (employee.getProfileImage() == null) {
+	        throw new EmployeeNotFoundException("No profile image set for this employee");
+	    }
+
+	    try {
+	        Path filePath = Paths.get(profileUploadDir, employee.getProfileImage());
+	        Resource resource = new UrlResource(filePath.toUri());
+
+	        if (!resource.exists() || !resource.isReadable()) {
+	            throw new EmployeeNotFoundException("Profile image file not found on disk");
+	        }
+	        return resource;
+
+	    } catch (MalformedURLException e) {
+	        throw new RuntimeException("Error loading profile image: " + e.getMessage());
+	    }
 	}
 	 
 	
