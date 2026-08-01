@@ -65,6 +65,7 @@ public class SecurityConfig {
                 
                 // --- ADDED THIS LINE TO ALLOW ACCESS TO LEAVES API ---
                 .requestMatchers("/api/leaves/**").permitAll() 
+                .requestMatchers("/api/auth/profile-image/**").permitAll()
                 
                 .requestMatchers(
                         "/v3/api-docs/**",

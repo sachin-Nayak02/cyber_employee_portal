@@ -25,6 +25,8 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
 
 
 
@@ -44,6 +46,8 @@ public interface EmployeeService {
 
 	AdminUserResponse generateEmpId(AdminUserRequest request); 
 	List<AdminUserResponse> getAllAdminUsers();
+	 String uploadProfileImage(MultipartFile file, Employee employee);
+	    Resource getProfileImage(Long employeeId);
 	List<BirthdayResponse> getTodayBirthdays(); 
 	 List<AnniversaryResponse> getTodayAnniversaries();
 	 List<BirthdayResponse> getUpcomingBirthdays();
@@ -62,6 +66,7 @@ public interface EmployeeService {
     List<NetworkResponse> findPeopleByName(String email, String name);
     List<AnniversaryResponse> getUpcomingAnniversaries();
     RegisterResponse getEmployeeById(Long id);
+   
 
 }
 
