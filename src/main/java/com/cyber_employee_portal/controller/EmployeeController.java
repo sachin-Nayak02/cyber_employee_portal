@@ -174,7 +174,7 @@ public class EmployeeController {
 
         return ResponseEntity.ok(employeeService.getBirthdayList());
 
-    }
+    } 
     @GetMapping("/gender/{gender}")
     public ResponseEntity<List<RegisterResponse>> getEmployeesByGender(
             @PathVariable String gender) {
