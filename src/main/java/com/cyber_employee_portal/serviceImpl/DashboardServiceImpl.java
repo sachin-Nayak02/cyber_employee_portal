@@ -26,13 +26,14 @@ public class DashboardServiceImpl implements DashboardService {
     private final ProjectService projectService;
     private final HolidayListService holidayListService;
 
-    @Override
+    @Override 
     public DashboardResponse getDashboardData(String email) {
 
         Employee employee = employeeRepository.findByEmail(email)
                 .orElseThrow(() -> new EmployeeNotFoundException("No employee found with email: " + email));
 
         EmployeeInfoResponse employeeInfo = new EmployeeInfoResponse(
+        		employee.getId(),
                 employee.getName(),
                 employee.getEmployeeId(),
                 employee.getRole() != null ? employee.getRole().getName() : "N/A",

@@ -55,10 +55,12 @@ public class AuthController {
             employeeRepository.save(employee);
 
             LoginResponse response = new LoginResponse(
+                   
+                    employee.getId(),
                     token,
                     employee.getEmail(),
                     employee.getRole().getName()
-            );
+            ); 
 
             return ResponseEntity.ok(response);
 
