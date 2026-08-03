@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cyber_employee_portal.dto.DepartmentResponse;
+import com.cyber_employee_portal.dto.DepartmentSummaryResponse;
+import com.cyber_employee_portal.dto.EmployeeDetailResponse;
 import com.cyber_employee_portal.dto.RegisterResponse;
 import com.cyber_employee_portal.service.DepartmentService;
 
@@ -26,15 +28,13 @@ public class DepartmentController {
 
     @Operation(summary = "Get all departments")
     @GetMapping
-    public ResponseEntity<List<DepartmentResponse>> getAllDepartments() {
-        List<DepartmentResponse> departments = departmentService.getAllDepartments();
-        return ResponseEntity.ok(departments);
+    public ResponseEntity<List<DepartmentSummaryResponse>> getAllDepartments() {
+        return ResponseEntity.ok(departmentService.getAllDepartments()); 
     }
 
     @Operation(summary = "Get all employees belonging to a department")
     @GetMapping("/{id}/employees")
-    public ResponseEntity<List<RegisterResponse>> getEmployeesByDepartment(@PathVariable Long id) {
-        List<RegisterResponse> employees = departmentService.getEmployeesByDepartment(id);
-        return ResponseEntity.ok(employees);
+    public ResponseEntity<List<EmployeeDetailResponse>> getEmployeesByDepartment(@PathVariable Long id) {
+        return ResponseEntity.ok(departmentService.getEmployeesByDepartment(id));
     }
 }

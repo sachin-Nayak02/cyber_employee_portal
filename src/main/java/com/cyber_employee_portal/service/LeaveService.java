@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface LeaveService {
     Leave applyForLeave(LeaveRequest request);
-    List<Leave> getPendingLeaves();
     List<Leave> getEmployeeLeaves(Long employeeId);
     Leave updateLeaveStatus(Long leaveId, String status);
     List<LeaveResponse> getActiveLeaves(LocalDate today);
+    List<LeaveResponse> getPendingLeaves();
 }

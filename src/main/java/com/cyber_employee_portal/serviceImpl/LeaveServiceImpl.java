@@ -47,10 +47,7 @@ public class LeaveServiceImpl implements LeaveService {
         return leaveRepository.save(leave);
     }
 
-    @Override
-    public List<Leave> getPendingLeaves() {
-        return leaveRepository.findByStatus("PENDING");
-    }
+   
 
     @Override
     public List<Leave> getEmployeeLeaves(Long employeeId) {
@@ -67,8 +64,8 @@ public class LeaveServiceImpl implements LeaveService {
     }
     
     @Override
-    public List<LeaveResponse> getActiveLeaves(LocalDate today) {
-        return leaveRepository.findByStartDateLessThanEqualAndEndDateGreaterThanEqual(today, today)
+    public List<LeaveResponse> getPendingLeaves() {
+        return leaveRepository.findByStatus("PENDING")
                 .stream()
                 .map(this::mapToLeaveResponse)
                 .collect(Collectors.toList()); 
@@ -77,6 +74,7 @@ public class LeaveServiceImpl implements LeaveService {
     private LeaveResponse mapToLeaveResponse(Leave leave) {
         return new LeaveResponse(
                 leave.getId(),
+                leave.getEmployee().getId(),                          // numeric id — new
                 leave.getEmployee().getName(),
                 leave.getEmployee().getEmployeeId(),
                 (leave.getEmployee().getDepartment() != null) ? leave.getEmployee().getDepartment().getDepartmentName() : "Unassigned",
@@ -89,5 +87,15 @@ public class LeaveServiceImpl implements LeaveService {
                 leave.getStatus()
         );
     }
+
+
+    @Override
+    public List<LeaveResponse> getActiveLeaves(LocalDate today) {
+        return leaveRepository.findByStartDateLessThanEqualAndEndDateGreaterThanEqual(today, today)
+                .stream()
+                .map(this::mapToLeaveResponse)
+                .collect(Collectors.toList());
+    }
+    }
      
-	}
+	

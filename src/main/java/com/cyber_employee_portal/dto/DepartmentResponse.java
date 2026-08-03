@@ -9,6 +9,17 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DepartmentResponse {
 
-	private long id;
-	 private String departmentName; 
+//	private long id;
+//	 private String departmentName; 
+	 
+	   private Long id;
+	    private String employeeId;
+	    private String name;
+	    private String email;
+	    private String phoneNumber;
+	    private String gender;
+	    private String roleName;
+	    private String departmentName;
+	    private String designation;
+	    private Boolean active;
 }
