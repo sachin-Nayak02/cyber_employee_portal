@@ -11,7 +11,8 @@ import java.util.List;
 public class DashboardResponse {
     private EmployeeInfoResponse employeeInfo;
     private ProjectResponse assignedProject;
-    private List<NetworkResponse> teamMembers;
+    private List<NetworkResponse> teamMembers;          // now: real project teammates
+    private List<NetworkResponse> departmentColleagues; // new: department roster (old teamMembers logic)
     private List<HolidayDTO> holidays;
     private List<BirthdayResponse> todayBirthdays;
     private List<BirthdayResponse> upcomingBirthdays;

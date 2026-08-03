@@ -56,6 +56,20 @@ public class ProjectController {
             @RequestBody ProjectRequest request) {
         return ResponseEntity.ok(projectService.updateProject(projectId, request));
     }
+    @PostMapping("/{projectName}/team/{employeeId}")
+    public ResponseEntity<ProjectResponse> addTeamMember(
+            @PathVariable String projectName,
+            @PathVariable String employeeId) {
+        return ResponseEntity.ok(projectService.addTeamMember(projectName, employeeId));
+    }
+
+    @DeleteMapping("/{projectName}/team/{employeeId}")
+    public ResponseEntity<String> removeTeamMember(
+            @PathVariable String projectName,
+            @PathVariable String employeeId) {
+        projectService.removeTeamMember(projectName, employeeId);
+        return ResponseEntity.ok(employeeId + " removed from project: " + projectName);
+    }
 
     @DeleteMapping("/{projectId}")
     public ResponseEntity<String> deleteProject(@PathVariable Long projectId) {

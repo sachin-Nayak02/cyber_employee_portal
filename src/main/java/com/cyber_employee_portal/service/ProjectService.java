@@ -14,4 +14,7 @@ public interface ProjectService {
     List<ProjectResponse> getProjectsByDepartment(String departmentName);
     ProjectResponse updateProject(Long projectId, ProjectRequest request);
     void deleteProject(Long projectId);
+    ProjectResponse addTeamMember(String projectName, String employeeId);
+    void removeTeamMember(String projectName, String employeeId);
+    List<com.cyber_employee_portal.dto.NetworkResponse> getProjectTeamMembers(String projectName, String excludeEmployeeId);
 }

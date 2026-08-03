@@ -18,7 +18,9 @@ import com.cyber_employee_portal.repository.ProjectRepository;
 import com.cyber_employee_portal.service.ProjectService;
 
 import lombok.RequiredArgsConstructor;
-
+import com.cyber_employee_portal.dto.NetworkResponse;
+import java.util.LinkedHashMap;
+import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
@@ -77,6 +79,73 @@ public class ProjectServiceImpl implements ProjectService {
 
         return projectRepository.findByDepartment_Id(department.getId()).stream()
                 .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+    @Override
+    public ProjectResponse addTeamMember(String projectName, String employeeId) {
+
+        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found: " + employeeId));
+
+        boolean alreadyOnProject = projectRepository
+                .findByProjectNameIgnoreCaseAndEmployee_EmployeeId(projectName, employeeId)
+                .isPresent();
+
+        if (alreadyOnProject) {
+            throw new IllegalArgumentException(employeeId + " is already a member of project: " + projectName);
+        }
+
+        List<Project> existingRows = projectRepository.findByProjectNameIgnoreCase(projectName);
+        if (existingRows.isEmpty()) {
+            throw new ProjectNotFoundException("Project not found: " + projectName);
+        }
+
+        // copy department/duration/status from an existing row on the same project
+        Project template = existingRows.get(0);
+
+        Project newRow = new Project();
+        newRow.setEmployee(employee);
+        newRow.setDepartment(template.getDepartment());
+        newRow.setProjectName(template.getProjectName());
+        newRow.setProjectDuration(template.getProjectDuration());
+        newRow.setProjectStatus(template.getProjectStatus());
+
+        return toResponse(projectRepository.save(newRow));
+    }
+
+    @Override
+    public void removeTeamMember(String projectName, String employeeId) {
+        Project row = projectRepository
+                .findByProjectNameIgnoreCaseAndEmployee_EmployeeId(projectName, employeeId)
+                .orElseThrow(() -> new ProjectNotFoundException(
+                        employeeId + " is not a member of project: " + projectName));
+
+        projectRepository.delete(row);
+    }
+    @Override
+    public List<NetworkResponse> getProjectTeamMembers(String projectName, String excludeEmployeeId) {
+        if (projectName == null) {
+            return List.of();
+        }
+
+        Map<String, Employee> teammates = new LinkedHashMap<>();
+        for (Project p : projectRepository.findByProjectNameIgnoreCase(projectName)) {
+            Employee emp = p.getEmployee();
+            if (emp != null && !emp.getEmployeeId().equalsIgnoreCase(excludeEmployeeId)) {
+                teammates.put(emp.getEmployeeId(), emp);
+            }
+        }
+
+        return teammates.values().stream()
+                .map(emp -> new NetworkResponse(
+                        emp.getId(),
+                        emp.getEmployeeId(),
+                        emp.getName(),
+                        emp.getEmail(),
+                        emp.getDesignation(),
+                        emp.getDepartment() != null ? emp.getDepartment().getDepartmentName() : "Not Assigned",
+                        emp.getProfileImage()
+                ))
                 .collect(Collectors.toList());
     }
 
