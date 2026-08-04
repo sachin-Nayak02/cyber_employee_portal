@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,8 +43,8 @@ public class LeaveController {
 
     // Admin fetches all pending leaves to review
     @GetMapping("/pending")
-    public ResponseEntity<List<Leave>> getPendingLeaves() {
-        return ResponseEntity.ok(leaveService.getPendingLeaves());
+    public ResponseEntity<List<LeaveResponse>> getPendingLeaves() {
+        return ResponseEntity.ok(leaveService.getPendingLeaves());  
     }
 
     // Admin approves or rejects a leave

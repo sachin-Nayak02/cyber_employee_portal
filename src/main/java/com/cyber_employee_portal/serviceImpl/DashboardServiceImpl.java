@@ -26,14 +26,14 @@ public class DashboardServiceImpl implements DashboardService {
     private final ProjectService projectService;
     private final HolidayListService holidayListService;
 
-    @Override 
+    @Override
     public DashboardResponse getDashboardData(String email) {
 
         Employee employee = employeeRepository.findByEmail(email)
                 .orElseThrow(() -> new EmployeeNotFoundException("No employee found with email: " + email));
 
         EmployeeInfoResponse employeeInfo = new EmployeeInfoResponse(
-        		employee.getId(),
+                employee.getId(),
                 employee.getName(),
                 employee.getEmployeeId(),
                 employee.getRole() != null ? employee.getRole().getName() : "N/A",
@@ -45,7 +45,14 @@ public class DashboardServiceImpl implements DashboardService {
         List<ProjectResponse> projects = projectService.getProjectsByEmployee(employee.getEmployeeId());
         ProjectResponse assignedProject = projects.isEmpty() ? null : projects.get(0);
 
-        List<NetworkResponse> teamMembers = employeeService.getMyNetwork(email);
+        // "Your Team" -> real project teammates (people on the same project)
+        List<NetworkResponse> teamMembers = projectService.getProjectTeamMembers(
+                assignedProject != null ? assignedProject.getProjectName() : null,
+                employee.getEmployeeId()
+        );
+
+        // "Associate Department" -> department roster (this is the old teamMembers logic, unchanged)
+        List<NetworkResponse> departmentColleagues = employeeService.getMyNetwork(email);
 
         List<HolidayDTO> holidays = holidayListService.getAllHolidays().stream()
                 .filter(h -> h.getHolidayDate() != null && !h.getHolidayDate().isBefore(LocalDate.now()))
@@ -59,7 +66,7 @@ public class DashboardServiceImpl implements DashboardService {
         List<AnniversaryResponse> upcomingAnniversaries = employeeService.getUpcomingAnniversaries();
 
         return new DashboardResponse(
-                employeeInfo, assignedProject, teamMembers, holidays,
+                employeeInfo, assignedProject, teamMembers, departmentColleagues, holidays,
                 todayBirthdays, upcomingBirthdays, todayAnniversaries, upcomingAnniversaries
         );
     }

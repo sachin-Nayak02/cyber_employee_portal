@@ -1,6 +1,7 @@
 package com.cyber_employee_portal.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findByEmployee_Id(Long employeeId);
     List<Project> findByDepartment_Id(Long departmentId);
+    List<Project> findByProjectNameIgnoreCase(String projectName);
+    Optional<Project> findByProjectNameIgnoreCaseAndEmployee_EmployeeId(String projectName, String employeeId);
 }
