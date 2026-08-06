@@ -191,6 +191,7 @@ public class EmployeeController {
     public ResponseEntity<RegisterResponse> getEmployeeById(@PathVariable Long id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
+   
 //    @ExceptionHandler(EmailAlreadyExistsException.class)
 //    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
 //        return ResponseEntity.status(400).body(e.getMessage()); 
