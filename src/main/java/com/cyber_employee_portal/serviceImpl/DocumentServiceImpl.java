@@ -182,4 +182,47 @@ public class DocumentServiceImpl implements DocumentService {
         if (bytes < 1024 * 1024) return String.format("%.0f KB", bytes / 1024.0);
         return String.format("%.1f MB", bytes / (1024.0 * 1024));
     }
+    
+    @Override
+    public List<DocumentResponse> getDocumentsByEmployeeId(Long employeeId) {
+        return documentRepository.findByEmployeeIdOrderByUploadedOnDesc(employeeId)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+ 
+    @Override
+    @Transactional
+    public void deleteDocumentAsAdmin(Long documentId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found: " + documentId));
+
+        try {
+            Files.deleteIfExists(Paths.get(document.getFilePath()));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file from disk: " + e.getMessage());
+        }
+        documentRepository.delete(document);
+    }
+    @Override
+    public Resource loadFileAsResourceAdmin(Long documentId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found: " + documentId));
+        try {
+            Path filePath = Paths.get(document.getFilePath());
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new DocumentNotFoundException("File not found on disk: " + document.getFileName());
+            }
+            return resource;
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error loading file: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Document getDocumentEntityById(Long documentId) {
+        return documentRepository.findById(documentId)
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found: " + documentId));
+    }
 }

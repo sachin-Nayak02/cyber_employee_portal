@@ -96,4 +96,46 @@ public class DocumentController {
             default -> "application/octet-stream";
         };
     }
+    
+    @Operation(summary = "Admin: get all documents for a specific employee")
+    @GetMapping("/admin/employee/{employeeId}")
+    public ResponseEntity<List<DocumentResponse>> getDocumentsByEmployee(@PathVariable Long employeeId) {
+        return ResponseEntity.ok(documentService.getDocumentsByEmployeeId(employeeId));
+    }
+
+    @Operation(summary = "Admin: view any employee's document inline")
+    @GetMapping("/admin/{id}/view")
+    public ResponseEntity<Resource> adminViewDocument(@PathVariable Long id) {
+        Document document = documentService.getDocumentEntityById(id);
+        Resource resource = documentService.loadFileAsResourceAdmin(id);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(getContentType(document.getFileType())))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + document.getFileName() + "\"")
+                .body(resource);
+    }
+
+    private String getContentType(String fileType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Operation(summary = "Admin: download any employee's document")
+    @GetMapping("/admin/{id}/download")
+    public ResponseEntity<Resource> adminDownloadDocument(@PathVariable Long id) {
+        Document document = documentService.getDocumentEntityById(id);
+        Resource resource = documentService.loadFileAsResourceAdmin(id);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getFileName() + "\"")
+                .body(resource);
+    }
+
+    @Operation(summary = "Admin: delete any employee's document")
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<Void> adminDeleteDocument(@PathVariable Long id) {
+        documentService.deleteDocumentAsAdmin(id);
+        return ResponseEntity.noContent().build();
+    }
 }

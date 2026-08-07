@@ -18,6 +18,9 @@ public class EmployeeDetailResponse {
     private String profileImage;
     private String gender;
     private LocalDate dateOfBirth;
+    private String bloodGroup;
+    private String maritalStatus;
+    private String nationality;
     private String address;
     private String city;
     private String state;
@@ -32,4 +35,5 @@ public class EmployeeDetailResponse {
     private String emergencyContactNumber;
     private String roleName;
     private Boolean active;
+
 }

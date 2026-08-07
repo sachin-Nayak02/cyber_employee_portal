@@ -62,11 +62,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/api/auth/update/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/auth/update/**").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
-                
+                .requestMatchers("/api/departments/**").hasRole("ADMIN")
+                .requestMatchers("/api/documents/admin/**").hasRole("ADMIN")
                 // --- ADDED THIS LINE TO ALLOW ACCESS TO LEAVES API ---
                 .requestMatchers("/api/leaves/**").permitAll() 
                 .requestMatchers("/api/auth/profile-image/**").permitAll()
-                
+                .requestMatchers(HttpMethod.POST, "/api/announcements").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/announcements").authenticated()
                 .requestMatchers(
                         "/v3/api-docs/**",
                         "/swagger-ui/**",

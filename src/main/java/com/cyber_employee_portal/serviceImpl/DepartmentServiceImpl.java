@@ -44,7 +44,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     private EmployeeDetailResponse mapToEmployeeDetail(Employee employee) {
         return new EmployeeDetailResponse(
-                employee.getId(),
+        		employee.getId(),
                 employee.getEmployeeId(),
                 employee.getName(),
                 employee.getEmail(),
@@ -52,12 +52,15 @@ public class DepartmentServiceImpl implements DepartmentService {
                 employee.getProfileImage(),
                 employee.getGender(),
                 employee.getDateOfBirth(),
+                employee.getBloodGroup(),
+                employee.getMaritalStatus(),
+                employee.getNationality(),
                 employee.getAddress(),
                 employee.getCity(),
                 employee.getState(),
                 employee.getCountry(),
                 employee.getPincode(),
-                (employee.getDepartment() != null) ? employee.getDepartment().getDepartmentName() : "Unassigned",
+                (employee.getDepartment() != null) ? employee.getDepartment().getDepartmentName() : "Not Assigned",
                 employee.getDesignation(),
                 employee.getEmploymentType(),
                 employee.getJoiningDate(),

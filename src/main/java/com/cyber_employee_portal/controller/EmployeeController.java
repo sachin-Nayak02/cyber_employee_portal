@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cyber_employee_portal.dto.CurrentDateTimeResponse;
+import com.cyber_employee_portal.dto.EmployeeDetailResponse;
 import com.cyber_employee_portal.dto.EmployeeLookupResponse;
 import com.cyber_employee_portal.dto.EmployeeResponse;
 
@@ -190,7 +191,7 @@ public class EmployeeController {
     @GetMapping("/{id}")
     public ResponseEntity<RegisterResponse> getEmployeeById(@PathVariable Long id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
-    }
+    } 
 //    @ExceptionHandler(EmailAlreadyExistsException.class)
 //    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
 //        return ResponseEntity.status(400).body(e.getMessage()); 
