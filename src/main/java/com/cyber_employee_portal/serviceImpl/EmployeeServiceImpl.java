@@ -524,7 +524,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 	                employee.getRole() != null ? employee.getRole().getName() : "N/A",
 	                employee.getGender(),
 	                employee.getDepartment() != null ? employee.getDepartment().getDepartmentName() : "Not Assigned",
+	                		
 	                "Employee fetched successfully"
+
 	        );
 	    }
 

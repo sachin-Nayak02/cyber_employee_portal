@@ -21,4 +21,9 @@ public interface DocumentService {
     void deleteDocument(Long documentId, Long employeeId);
 
     DocumentStatsResponse getStats(Long employeeId);
+    
+    List<DocumentResponse> getDocumentsByEmployeeId(Long employeeId);
+    void deleteDocumentAsAdmin(Long documentId);
+    Resource loadFileAsResourceAdmin(Long documentId);
+    Document getDocumentEntityById(Long documentId);
 }
